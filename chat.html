@@ -2,74 +2,88 @@
 <html lang="pt-BR">
 <head>
 <meta charset="UTF-8"/>
-<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"/>
 <title>VaultChat — Chat Seguro</title>
 <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&display=swap" rel="stylesheet"/>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <style>
-*{margin:0;padding:0;box-sizing:border-box}
-body{background:#0A0B0D;color:#F0EEE8;font-family:'Syne',sans-serif;height:100vh;display:flex;flex-direction:column;user-select:none}
-.header{background:#0F1114;border-bottom:0.5px solid #2A2D38;padding:12px 16px;display:flex;align-items:center;justify-content:space-between}
-.header-left{display:flex;align-items:center;gap:10px}
-.logo-icon{width:32px;height:32px;background:#1D9E75;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:16px}
-.room-name{font-weight:700;font-size:15px}
-.room-ttl{font-size:11px;color:#7A7D8A}
-.btn-small{background:#161820;border:0.5px solid #2A2D38;border-radius:8px;padding:6px 12px;color:#F0EEE8;font-size:12px;font-family:'Syne',sans-serif;cursor:pointer}
-.btn-danger{border-color:#D85A30;color:#D85A30}
-.rooms-bar{background:#0F1114;border-bottom:0.5px solid #2A2D38;padding:8px 16px;display:flex;gap:8px;overflow-x:auto}
-.room-chip{background:#161820;border:0.5px solid #2A2D38;border-radius:20px;padding:5px 12px;font-size:12px;cursor:pointer;white-space:nowrap;transition:all .2s}
-.room-chip.active{background:#1D9E75;border-color:#1D9E75;color:#fff;font-weight:700}
-.add-room{background:none;border:0.5px dashed #2A2D38;border-radius:20px;padding:5px 12px;font-size:12px;color:#7A7D8A;cursor:pointer;font-family:'Syne',sans-serif}
-.messages{flex:1;overflow-y:auto;padding:16px;display:flex;flex-direction:column;gap:10px}
-.msg-bubble{max-width:75%;padding:10px 14px;border-radius:14px;font-size:14px;line-height:1.5;position:relative}
-.msg-bubble.mine{background:#1D9E75;align-self:flex-end;border-bottom-right-radius:4px}
-.msg-bubble.other{background:#161820;border:0.5px solid #2A2D38;align-self:flex-start;border-bottom-left-radius:4px}
-.msg-meta{font-size:10px;opacity:.7;margin-top:4px;display:flex;align-items:center;gap:6px}
-.ttl-badge{background:rgba(0,0,0,.3);border-radius:10px;padding:2px 6px;font-size:10px}
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+:root{--bg:#0A0B0D;--bg2:#0F1114;--bg3:#161820;--border:#2A2D38;--text:#F0EEE8;--muted:#7A7D8A;--accent:#1D9E75;--danger:#D85A30;}
+html,body{height:100%;overflow:hidden}
+body{background:var(--bg);color:var(--text);font-family:'Syne',sans-serif;display:flex;flex-direction:column;user-select:none;-webkit-user-select:none;}
+.header{background:var(--bg2);border-bottom:1px solid var(--border);padding:10px 14px;display:flex;align-items:center;justify-content:space-between;flex-shrink:0;min-height:54px;}
+.header-left{display:flex;align-items:center;gap:8px;min-width:0}
+.logo-icon{width:30px;height:30px;background:var(--accent);border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:14px;flex-shrink:0}
+.room-info{min-width:0}
+.room-name{font-weight:700;font-size:14px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:140px}
+.room-ttl{font-size:10px;color:var(--muted);white-space:nowrap}
+.header-actions{display:flex;gap:6px;flex-shrink:0}
+.btn-small{background:var(--bg3);border:1px solid var(--border);border-radius:8px;padding:5px 10px;color:var(--text);font-size:11px;font-family:'Syne',sans-serif;cursor:pointer;white-space:nowrap}
+.btn-danger{border-color:var(--danger);color:var(--danger)}
+.rooms-bar{background:var(--bg2);border-bottom:1px solid var(--border);padding:8px 12px;display:flex;gap:6px;overflow-x:auto;flex-shrink:0;scrollbar-width:none}
+.rooms-bar::-webkit-scrollbar{display:none}
+.room-chip{background:var(--bg3);border:1px solid var(--border);border-radius:20px;padding:5px 12px;font-size:12px;cursor:pointer;white-space:nowrap;transition:all .2s;flex-shrink:0}
+.room-chip.active{background:var(--accent);border-color:var(--accent);color:#fff;font-weight:700}
+.add-room{background:none;border:1px dashed var(--border);border-radius:20px;padding:5px 12px;font-size:12px;color:var(--muted);cursor:pointer;font-family:'Syne',sans-serif;white-space:nowrap;flex-shrink:0}
+.messages{flex:1;overflow-y:auto;padding:12px;display:flex;flex-direction:column;gap:8px;-webkit-overflow-scrolling:touch;}
+.msg-bubble{max-width:80%;padding:9px 12px;border-radius:14px;font-size:14px;line-height:1.5;word-break:break-word}
+.msg-bubble.mine{background:var(--accent);align-self:flex-end;border-bottom-right-radius:4px}
+.msg-bubble.other{background:var(--bg3);border:1px solid var(--border);align-self:flex-start;border-bottom-left-radius:4px}
+.msg-meta{font-size:10px;opacity:.7;margin-top:4px;display:flex;align-items:center;gap:5px;flex-wrap:wrap}
+.ttl-badge{background:rgba(0,0,0,.3);border-radius:10px;padding:2px 5px;font-size:10px}
 .ttl-urgent{background:rgba(216,90,48,.4);color:#ffaa88}
-.msg-sender{font-size:11px;font-weight:700;color:#1D9E75;margin-bottom:3px}
-.enc-badge{font-size:10px;color:#7A7D8A;display:flex;align-items:center;gap:4px;padding:4px 8px;background:#161820;border-radius:8px;border:0.5px solid #2A2D38;align-self:center;margin:8px 0}
-.enc-dot{width:5px;height:5px;border-radius:50%;background:#1D9E75;animation:pulse 2s infinite}
+.msg-sender{font-size:11px;font-weight:700;color:var(--accent);margin-bottom:3px}
+.enc-badge{font-size:10px;color:var(--muted);display:flex;align-items:center;gap:4px;padding:4px 8px;background:var(--bg3);border-radius:8px;border:1px solid var(--border);align-self:center;margin:6px 0}
+.enc-dot{width:5px;height:5px;border-radius:50%;background:var(--accent);animation:pulse 2s infinite}
 @keyframes pulse{0%,100%{opacity:1}50%{opacity:.3}}
-.input-area{background:#0F1114;border-top:0.5px solid #2A2D38;padding:12px 16px;display:flex;flex-direction:column;gap:8px}
-.ttl-selector{display:flex;align-items:center;gap:8px;font-size:12px;color:#7A7D8A}
-.ttl-selector select{background:#161820;border:0.5px solid #2A2D38;border-radius:8px;padding:4px 8px;color:#F0EEE8;font-family:'Syne',sans-serif;font-size:12px;outline:none}
-.input-row{display:flex;gap:8px}
-.msg-input{flex:1;background:#161820;border:0.5px solid #2A2D38;border-radius:12px;padding:12px 14px;color:#F0EEE8;font-size:14px;font-family:'Syne',sans-serif;outline:none;resize:none;max-height:100px}
-.msg-input:focus{border-color:#1D9E75}
-.send-btn{background:#1D9E75;border:none;border-radius:12px;width:44px;height:44px;cursor:pointer;font-size:18px;color:white}
-.modal{position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,.8);display:none;align-items:center;justify-content:center;z-index:1000}
-.modal-card{background:#0F1114;border:0.5px solid #2A2D38;border-radius:18px;padding:28px;width:90%;max-width:360px}
-.modal-title{font-size:18px;font-weight:800;margin-bottom:16px}
-.field{margin-bottom:14px}
-.field label{display:block;font-size:12px;color:#7A7D8A;margin-bottom:6px;font-weight:600;text-transform:uppercase}
-.field input,.field select{width:100%;background:#161820;border:0.5px solid #2A2D38;border-radius:10px;padding:12px 14px;color:#F0EEE8;font-size:14px;font-family:'Syne',sans-serif;outline:none}
-.btn-full{width:100%;padding:13px;background:#1D9E75;border:none;border-radius:12px;color:#fff;font-size:15px;font-family:'Syne',sans-serif;font-weight:800;cursor:pointer;margin-top:4px}
-.empty-state{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;color:#7A7D8A;gap:12px;text-align:center;padding:32px}
-.screenshot-overlay{position:fixed;top:0;left:0;right:0;bottom:0;background:#0A0B0D;z-index:99999;display:none;align-items:center;justify-content:center;flex-direction:column;gap:16px}
+.empty-state{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;color:var(--muted);gap:10px;text-align:center;padding:24px}
+.input-area{background:var(--bg2);border-top:1px solid var(--border);padding:10px 12px;display:flex;flex-direction:column;gap:8px;flex-shrink:0}
+.ttl-selector{display:flex;align-items:center;gap:6px;font-size:12px;color:var(--muted)}
+.ttl-selector select{background:var(--bg3);border:1px solid var(--border);border-radius:8px;padding:4px 8px;color:var(--text);font-family:'Syne',sans-serif;font-size:12px;outline:none}
+.input-row{display:flex;gap:8px;align-items:flex-end}
+.msg-input{flex:1;background:var(--bg3);border:1px solid var(--border);border-radius:12px;padding:10px 12px;color:var(--text);font-size:15px;font-family:'Syne',sans-serif;outline:none;resize:none;max-height:80px;line-height:1.4}
+.msg-input:focus{border-color:var(--accent)}
+.send-btn{background:var(--accent);border:none;border-radius:12px;width:42px;height:42px;cursor:pointer;font-size:16px;color:white;flex-shrink:0}
+.modal{position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,.85);display:none;align-items:flex-end;justify-content:center;z-index:1000}
+@media(min-width:600px){.modal{align-items:center}}
+.modal-card{background:var(--bg2);border:1px solid var(--border);border-radius:18px 18px 0 0;padding:24px;width:100%;max-width:480px}
+@media(min-width:600px){.modal-card{border-radius:18px}}
+.modal-title{font-size:17px;font-weight:800;margin-bottom:16px}
+.field{margin-bottom:12px}
+.field label{display:block;font-size:11px;color:var(--muted);margin-bottom:5px;font-weight:600;text-transform:uppercase}
+.field input,.field select{width:100%;background:var(--bg3);border:1px solid var(--border);border-radius:10px;padding:12px 14px;color:var(--text);font-size:15px;font-family:'Syne',sans-serif;outline:none}
+.btn-full{width:100%;padding:13px;background:var(--accent);border:none;border-radius:12px;color:#fff;font-size:15px;font-family:'Syne',sans-serif;font-weight:800;cursor:pointer;margin-top:4px}
+.btn-cancel-modal{width:100%;padding:11px;background:transparent;border:1px solid var(--border);border-radius:12px;color:var(--muted);font-size:14px;font-family:'Syne',sans-serif;cursor:pointer;margin-top:8px}
+.screenshot-overlay{position:fixed;inset:0;background:var(--bg);z-index:99999;display:none;align-items:center;justify-content:center;flex-direction:column;gap:12px}
 .screenshot-overlay.show{display:flex}
-.online-dot{width:8px;height:8px;border-radius:50%;background:#1D9E75;display:inline-block;margin-right:4px;animation:pulse 2s infinite}
-.notif-toast{position:fixed;top:20px;right:20px;z-index:9999;background:#1D9E75;color:white;padding:14px 20px;border-radius:10px;font-family:'Syne',sans-serif;font-size:14px;box-shadow:0 4px 20px rgba(0,0,0,0.3);max-width:300px;animation:slideIn .3s ease;}
-@keyframes slideIn{from{opacity:0;transform:translateX(20px)}to{opacity:1;transform:translateX(0)}}
+.online-dot{width:7px;height:7px;border-radius:50%;background:var(--accent);display:inline-block;margin-right:4px;animation:pulse 2s infinite}
+.notif-toast{position:fixed;top:16px;left:50%;transform:translateX(-50%);z-index:9999;background:var(--accent);color:white;padding:12px 18px;border-radius:10px;font-family:'Syne',sans-serif;font-size:13px;box-shadow:0 4px 20px rgba(0,0,0,0.4);max-width:90%;animation:slideDown .3s ease;}
+@keyframes slideDown{from{opacity:0;transform:translateX(-50%) translateY(-10px)}to{opacity:1;transform:translateX(-50%) translateY(0)}}
+@media(min-width:768px){
+  .room-name{max-width:300px}
+  .msg-bubble{max-width:60%}
+  .messages{padding:16px 15%}
+  .input-area{padding:12px 15%}
+}
 </style>
 </head>
 <body>
 
 <div class="screenshot-overlay" id="screenshotOverlay">
-  <div style="font-size:48px">🔒</div>
-  <div style="font-size:18px;font-weight:800">Conteúdo protegido</div>
-  <div style="font-size:14px;color:#7A7D8A">Screenshot bloqueado</div>
+  <div style="font-size:40px">🔒</div>
+  <div style="font-size:16px;font-weight:800">Conteúdo protegido</div>
+  <div style="font-size:13px;color:var(--muted)">Screenshot bloqueado</div>
 </div>
 
 <div class="header">
   <div class="header-left">
     <div class="logo-icon">🔒</div>
-    <div>
+    <div class="room-info">
       <div class="room-name" id="currentRoomName">VaultChat</div>
       <div class="room-ttl" id="currentRoomTTL"><span class="online-dot"></span>Selecione uma sala</div>
     </div>
   </div>
-  <div style="display:flex;gap:8px">
+  <div class="header-actions">
     <button class="btn-small" onclick="showNewRoom()">+ Sala</button>
     <button class="btn-small btn-danger" onclick="clearRoom()">Limpar</button>
     <button class="btn-small" onclick="goLogin()">Sair</button>
@@ -82,27 +96,27 @@ body{background:#0A0B0D;color:#F0EEE8;font-family:'Syne',sans-serif;height:100vh
 
 <div class="messages" id="messages">
   <div class="empty-state" id="emptyState">
-    <div style="font-size:48px">🔐</div>
-    <div style="font-weight:700;font-size:16px">Nenhuma sala selecionada</div>
+    <div style="font-size:40px">🔐</div>
+    <div style="font-weight:700;font-size:15px">Nenhuma sala selecionada</div>
     <div style="font-size:13px">Crie uma sala para começar</div>
-    <button class="btn-full" style="max-width:200px;margin-top:8px" onclick="showNewRoom()">Criar sala</button>
+    <button class="btn-full" style="max-width:180px;margin-top:8px" onclick="showNewRoom()">Criar sala</button>
   </div>
 </div>
 
 <div class="input-area" id="inputArea" style="display:none">
   <div class="ttl-selector">
-    🕐 Expira em:
+    🕐
     <select id="ttlSelect">
-      <option value="3600000">1 hora</option>
-      <option value="21600000">6 horas</option>
-      <option value="86400000" selected>24 horas</option>
+      <option value="3600000">1h</option>
+      <option value="21600000">6h</option>
+      <option value="86400000" selected>24h</option>
       <option value="259200000">3 dias</option>
       <option value="604800000">7 dias</option>
       <option value="0">Nunca</option>
     </select>
   </div>
   <div class="input-row">
-    <textarea class="msg-input" id="msgInput" placeholder="Mensagem segura..." rows="1" onkeydown="handleKey(event)"></textarea>
+    <textarea class="msg-input" id="msgInput" placeholder="Mensagem segura..." rows="1" onkeydown="handleKey(event)" oninput="autoResize(this)"></textarea>
     <button class="send-btn" onclick="sendMessage()">➤</button>
   </div>
 </div>
@@ -126,12 +140,11 @@ body{background:#0A0B0D;color:#F0EEE8;font-family:'Syne',sans-serif;height:100vh
       </select>
     </div>
     <button class="btn-full" onclick="createRoom()">Criar sala</button>
-    <button class="btn-small" style="width:100%;margin-top:8px;text-align:center" onclick="closeModal()">Cancelar</button>
+    <button class="btn-cancel-modal" onclick="closeModal()">Cancelar</button>
   </div>
 </div>
 
 <script>
-// Proteção screenshot
 document.addEventListener('keyup',e=>{
   if(e.key==='PrintScreen'){
     document.getElementById('screenshotOverlay').classList.add('show');
@@ -145,14 +158,13 @@ document.addEventListener('visibilitychange',()=>{
   }
 });
 
-// Supabase
+function autoResize(el){el.style.height='auto';el.style.height=Math.min(el.scrollHeight,80)+'px';}
+
 const SUPABASE_URL='https://exkspbpamuqzzrbpbflx.supabase.co';
 const SUPABASE_KEY='sb_publishable_AqEz3N2R5apg8tGG0rDu5w_2L92h4ya';
 const sb=supabase.createClient(SUPABASE_URL,SUPABASE_KEY);
-
 const user=JSON.parse(localStorage.getItem('vc_user')||'{"name":"Usuário","email":""}');
-let currentRoom=null;
-let realtimeSub=null;
+let currentRoom=null,realtimeSub=null;
 
 if(!localStorage.getItem('vc_token'))window.location.href='login.html';
 
@@ -163,8 +175,7 @@ async function loadRooms(){
   if(data)data.forEach(r=>{
     const chip=document.createElement('div');
     chip.className='room-chip'+(currentRoom===r.id?' active':'');
-    chip.textContent=r.name;
-    chip.onclick=()=>selectRoom(r);
+    chip.textContent=r.name;chip.onclick=()=>selectRoom(r);
     bar.appendChild(chip);
   });
 }
@@ -172,13 +183,11 @@ async function loadRooms(){
 async function selectRoom(room){
   currentRoom=room.id;
   document.getElementById('currentRoomName').textContent=room.name;
-  document.getElementById('currentRoomTTL').innerHTML='<span class="online-dot"></span>'+ttlLabel(room.ttl)+' · E2E ativo';
+  document.getElementById('currentRoomTTL').innerHTML='<span class="online-dot"></span>'+ttlLabel(room.ttl)+' · E2E';
   document.getElementById('inputArea').style.display='flex';
   document.getElementById('ttlSelect').value=room.ttl||86400000;
   document.getElementById('emptyState').style.display='none';
-  loadRooms();
-  await loadMessages();
-  subscribeRoom();
+  loadRooms();await loadMessages();subscribeRoom();
 }
 
 async function loadMessages(){
@@ -190,39 +199,30 @@ async function loadMessages(){
 }
 
 function renderMessages(msgs){
-  const container=document.getElementById('messages');
-  container.innerHTML='';
+  const c=document.getElementById('messages');
+  c.innerHTML='';
   const enc=document.createElement('div');
   enc.className='enc-badge';
-  enc.innerHTML='<div class="enc-dot"></div> Criptografia E2E · Mensagens expiram automaticamente';
-  container.appendChild(enc);
+  enc.innerHTML='<div class="enc-dot"></div> E2E · Mensagens expiram automaticamente';
+  c.appendChild(enc);
   msgs.forEach(msg=>{
     const isMine=msg.sender===user.name;
-    const bubble=document.createElement('div');
-    bubble.className='msg-bubble '+(isMine?'mine':'other');
-    if(!isMine){
-      const s=document.createElement('div');
-      s.className='msg-sender';s.textContent=msg.sender;
-      bubble.appendChild(s);
-    }
-    const t=document.createElement('div');
-    t.textContent=msg.text;bubble.appendChild(t);
-    const meta=document.createElement('div');
-    meta.className='msg-meta';
-    const time=new Date(msg.sent_at).toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'});
-    meta.innerHTML='<span>'+time+'</span>';
+    const b=document.createElement('div');
+    b.className='msg-bubble '+(isMine?'mine':'other');
+    if(!isMine){const s=document.createElement('div');s.className='msg-sender';s.textContent=msg.sender;b.appendChild(s);}
+    const t=document.createElement('div');t.textContent=msg.text;b.appendChild(t);
+    const meta=document.createElement('div');meta.className='msg-meta';
+    meta.innerHTML='<span>'+new Date(msg.sent_at).toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'})+'</span>';
     if(msg.expires_at){
       const diff=new Date(msg.expires_at)-new Date();
-      const urgent=diff<3600000;
       const badge=document.createElement('span');
-      badge.className='ttl-badge'+(urgent?' ttl-urgent':'');
+      badge.className='ttl-badge'+(diff<3600000?' ttl-urgent':'');
       badge.textContent='⏱ '+timeLeft(msg.expires_at);
       meta.appendChild(badge);
     }
-    bubble.appendChild(meta);
-    container.appendChild(bubble);
+    b.appendChild(meta);c.appendChild(b);
   });
-  container.scrollTop=container.scrollHeight;
+  c.scrollTop=c.scrollHeight;
 }
 
 function subscribeRoom(){
@@ -236,127 +236,71 @@ function subscribeRoom(){
 async function sendMessage(){
   if(!currentRoom)return;
   const input=document.getElementById('msgInput');
-  const text=input.value.trim();
-  if(!text)return;
+  const text=input.value.trim();if(!text)return;
   const ttl=parseInt(document.getElementById('ttlSelect').value);
   const expires_at=ttl>0?new Date(Date.now()+ttl).toISOString():null;
-  await sb.from('messages').insert({
-    id:Date.now().toString(),
-    room_id:currentRoom,
-    sender:user.name,
-    text,
-    sent_at:new Date().toISOString(),
-    expires_at
-  });
-  input.value='';
+  await sb.from('messages').insert({id:Date.now().toString(),room_id:currentRoom,sender:user.name,text,sent_at:new Date().toISOString(),expires_at});
+  input.value='';input.style.height='auto';
 }
 
 function handleKey(e){if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();sendMessage();}}
-
-function showNewRoom(){
-  document.getElementById('newRoomModal').style.display='flex';
-  document.getElementById('roomNameInput').focus();
-}
+function showNewRoom(){document.getElementById('newRoomModal').style.display='flex';setTimeout(()=>document.getElementById('roomNameInput').focus(),100);}
 function closeModal(){document.getElementById('newRoomModal').style.display='none';}
 
 async function createRoom(){
-  const name=document.getElementById('roomNameInput').value.trim();
-  if(!name)return;
+  const name=document.getElementById('roomNameInput').value.trim();if(!name)return;
   const ttl=parseInt(document.getElementById('roomTTLInput').value);
-  const id='room_'+Date.now();
-  const{data}=await sb.from('rooms').insert({id,name,ttl,created_at:new Date().toISOString()}).select().single();
-  closeModal();
-  document.getElementById('roomNameInput').value='';
-  await loadRooms();
-  if(data)selectRoom(data);
+  const{data}=await sb.from('rooms').insert({id:'room_'+Date.now(),name,ttl,created_at:new Date().toISOString()}).select().single();
+  closeModal();document.getElementById('roomNameInput').value='';
+  await loadRooms();if(data)selectRoom(data);
 }
 
 async function clearRoom(){
   if(!currentRoom)return;
   if(confirm('Apagar todas as mensagens desta sala?')){
-    await sb.from('messages').delete().eq('room_id',currentRoom);
-    loadMessages();
+    await sb.from('messages').delete().eq('room_id',currentRoom);loadMessages();
   }
 }
 
 function ttlLabel(ms){
-  if(!ms||ms==0)return'Nunca expira';
-  if(ms<=3600000)return'1h TTL';
-  if(ms<=21600000)return'6h TTL';
-  if(ms<=86400000)return'24h TTL';
-  if(ms<=259200000)return'3 dias TTL';
-  return'7 dias TTL';
+  if(!ms||ms==0)return'Nunca';
+  if(ms<=3600000)return'1h TTL';if(ms<=21600000)return'6h TTL';
+  if(ms<=86400000)return'24h TTL';if(ms<=259200000)return'3d TTL';return'7d TTL';
 }
 
-function timeLeft(expiresAt){
-  const diff=new Date(expiresAt)-new Date();
-  if(diff<=0)return'Expirada';
-  const h=Math.floor(diff/3600000);
-  const m=Math.floor((diff%3600000)/60000);
-  if(h>0)return h+'h '+m+'m';
-  return m+'m';
+function timeLeft(e){
+  const d=new Date(e)-new Date();if(d<=0)return'Expirada';
+  const h=Math.floor(d/3600000),m=Math.floor((d%3600000)/60000);
+  return h>0?h+'h '+m+'m':m+'m';
 }
 
-function goLogin(){window.location.href='login.html';}
+function mostrarToast(title,body){
+  const div=document.createElement('div');div.className='notif-toast';
+  div.innerHTML='<strong>🔒 '+(title||'VaultChat')+'</strong><br>'+(body||'Nova mensagem');
+  document.body.appendChild(div);setTimeout(()=>div.remove(),4000);
+}
 
-// TTL cleanup a cada minuto
+function goLogin(){localStorage.removeItem('vc_token');window.location.href='login.html';}
 setInterval(()=>{if(currentRoom)loadMessages();},60000);
-
 loadRooms();
 </script>
 
-<!-- 🔔 NOTIFICAÇÕES PUSH FIREBASE -->
 <script type="module">
-import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.7.0/firebase-app.js';
-import { getMessaging, getToken, onMessage } from 'https://www.gstatic.com/firebasejs/10.7.0/firebase-messaging.js';
-
-const firebaseConfig = {
-  apiKey: "AIzaSyDyJNu9HnyCIUJYTEJ4KoTeORDVMTXPyzA",
-  authDomain: "vaultchat-dce0b.firebaseapp.com",
-  projectId: "vaultchat-dce0b",
-  storageBucket: "vaultchat-dce0b.firebasestorage.app",
-  messagingSenderId: "936113564920",
-  appId: "1:936113564920:web:0667849eadf3cdb4b19f0d"
-};
-
-const app = initializeApp(firebaseConfig);
-const messaging = getMessaging(app);
-const VAPID_KEY = "MzE3MGU3OTAtYTY0Yi00OGU2LWI0NjUtMGU3Y2IyNjVmMzZl";
-
-function mostrarToast(title, body) {
-  const div = document.createElement('div');
-  div.className = 'notif-toast';
-  div.innerHTML = `<strong>🔒 ${title||'VaultChat'}</strong><br>${body||'Nova mensagem'}`;
-  document.body.appendChild(div);
-  setTimeout(() => div.remove(), 4000);
+import{initializeApp}from'https://www.gstatic.com/firebasejs/10.7.0/firebase-app.js';
+import{getMessaging,getToken,onMessage}from'https://www.gstatic.com/firebasejs/10.7.0/firebase-messaging.js';
+const app=initializeApp({apiKey:"AIzaSyDyJNu9HnyCIUJYTEJ4KoTeORDVMTXPyzA",authDomain:"vaultchat-dce0b.firebaseapp.com",projectId:"vaultchat-dce0b",storageBucket:"vaultchat-dce0b.firebasestorage.app",messagingSenderId:"936113564920",appId:"1:936113564920:web:0667849eadf3cdb4b19f0d"});
+const messaging=getMessaging(app);
+async function ativar(){
+  try{
+    if(!('Notification'in window))return;
+    const p=await Notification.requestPermission();if(p!=='granted')return;
+    const reg=await navigator.serviceWorker.register('/firebase-messaging-sw.js');
+    const token=await getToken(messaging,{vapidKey:'MzE3MGU3OTAtYTY0Yi00OGU2LWI0NjUtMGU3Y2IyNjVmMzZl',serviceWorkerRegistration:reg});
+    if(token)localStorage.setItem('fcm_token',token);
+  }catch(e){console.log('[VaultChat]',e.message);}
 }
-
-async function ativarNotificacoes() {
-  try {
-    if (!('Notification' in window)) return;
-    const permission = await Notification.requestPermission();
-    if (permission !== 'granted') return;
-    const registration = await navigator.serviceWorker.register('/firebase-messaging-sw.js');
-    const token = await getToken(messaging, { vapidKey: VAPID_KEY, serviceWorkerRegistration: registration });
-    if (token) {
-      console.log('[VaultChat] 🔔 Notificações ativas!');
-      localStorage.setItem('fcm_token', token);
-    }
-  } catch (err) {
-    console.log('[VaultChat] Notificações não disponíveis:', err.message);
-  }
-}
-
-onMessage(messaging, (payload) => {
-  const { title, body } = payload.notification || {};
-  mostrarToast(title, body);
-});
-
-window.addEventListener('load', () => {
-  const user = JSON.parse(localStorage.getItem('vc_user') || '{}');
-  if (user.name) ativarNotificacoes();
-});
+onMessage(messaging,(p)=>{const{title,body}=p.notification||{};mostrarToast(title,body);});
+window.addEventListener('load',()=>{const u=JSON.parse(localStorage.getItem('vc_user')||'{}');if(u.name)ativar();});
 </script>
-
 </body>
 </html>

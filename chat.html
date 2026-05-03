@@ -49,6 +49,8 @@ body{background:#0A0B0D;color:#F0EEE8;font-family:'Syne',sans-serif;height:100vh
 .screenshot-overlay{position:fixed;top:0;left:0;right:0;bottom:0;background:#0A0B0D;z-index:99999;display:none;align-items:center;justify-content:center;flex-direction:column;gap:16px}
 .screenshot-overlay.show{display:flex}
 .online-dot{width:8px;height:8px;border-radius:50%;background:#1D9E75;display:inline-block;margin-right:4px;animation:pulse 2s infinite}
+.notif-toast{position:fixed;top:20px;right:20px;z-index:9999;background:#1D9E75;color:white;padding:14px 20px;border-radius:10px;font-family:'Syne',sans-serif;font-size:14px;box-shadow:0 4px 20px rgba(0,0,0,0.3);max-width:300px;animation:slideIn .3s ease;}
+@keyframes slideIn{from{opacity:0;transform:translateX(20px)}to{opacity:1;transform:translateX(0)}}
 </style>
 </head>
 <body>
@@ -182,7 +184,6 @@ async function selectRoom(room){
 async function loadMessages(){
   if(!currentRoom)return;
   const now=new Date().toISOString();
-  // Remove expiradas
   await sb.from('messages').delete().eq('room_id',currentRoom).lt('expires_at',now).not('expires_at','is',null);
   const{data}=await sb.from('messages').select('*').eq('room_id',currentRoom).order('sent_at');
   renderMessages(data||[]);
@@ -303,5 +304,59 @@ setInterval(()=>{if(currentRoom)loadMessages();},60000);
 
 loadRooms();
 </script>
+
+<!-- 🔔 NOTIFICAÇÕES PUSH FIREBASE -->
+<script type="module">
+import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.7.0/firebase-app.js';
+import { getMessaging, getToken, onMessage } from 'https://www.gstatic.com/firebasejs/10.7.0/firebase-messaging.js';
+
+const firebaseConfig = {
+  apiKey: "AIzaSyDyJNu9HnyCIUJYTEJ4KoTeORDVMTXPyzA",
+  authDomain: "vaultchat-dce0b.firebaseapp.com",
+  projectId: "vaultchat-dce0b",
+  storageBucket: "vaultchat-dce0b.firebasestorage.app",
+  messagingSenderId: "936113564920",
+  appId: "1:936113564920:web:0667849eadf3cdb4b19f0d"
+};
+
+const app = initializeApp(firebaseConfig);
+const messaging = getMessaging(app);
+const VAPID_KEY = "MzE3MGU3OTAtYTY0Yi00OGU2LWI0NjUtMGU3Y2IyNjVmMzZl";
+
+function mostrarToast(title, body) {
+  const div = document.createElement('div');
+  div.className = 'notif-toast';
+  div.innerHTML = `<strong>🔒 ${title||'VaultChat'}</strong><br>${body||'Nova mensagem'}`;
+  document.body.appendChild(div);
+  setTimeout(() => div.remove(), 4000);
+}
+
+async function ativarNotificacoes() {
+  try {
+    if (!('Notification' in window)) return;
+    const permission = await Notification.requestPermission();
+    if (permission !== 'granted') return;
+    const registration = await navigator.serviceWorker.register('/firebase-messaging-sw.js');
+    const token = await getToken(messaging, { vapidKey: VAPID_KEY, serviceWorkerRegistration: registration });
+    if (token) {
+      console.log('[VaultChat] 🔔 Notificações ativas!');
+      localStorage.setItem('fcm_token', token);
+    }
+  } catch (err) {
+    console.log('[VaultChat] Notificações não disponíveis:', err.message);
+  }
+}
+
+onMessage(messaging, (payload) => {
+  const { title, body } = payload.notification || {};
+  mostrarToast(title, body);
+});
+
+window.addEventListener('load', () => {
+  const user = JSON.parse(localStorage.getItem('vc_user') || '{}');
+  if (user.name) ativarNotificacoes();
+});
+</script>
+
 </body>
 </html>

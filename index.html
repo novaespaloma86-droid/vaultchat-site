@@ -1,0 +1,432 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<link rel="manifest" href="/manifest.json">
+<meta name="theme-color" content="#1D9E75">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="VaultChat">
+<link rel="apple-touch-icon" href="/vaultchat-icon-1024.png">
+<link rel="icon" href="/vaultchat-icon-1024.png">
+<title>VaultChat — Comunicação Segura para Equipes</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=Instrument+Serif:ital@0;1&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet"/>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+:root{
+  --bg:#0A0B0D;--bg2:#0F1114;--bg3:#161820;--surface:#1A1D24;
+  --border:#2A2D38;--border2:#353849;--text:#F0EEE8;--muted:#7A7D8A;
+  --accent:#1D9E75;--accent2:#9FDDCC;--danger:#D85A30;--gold:#C8A84B;
+  --font-display:'Syne',sans-serif;--font-serif:'Instrument Serif',serif;--font-mono:'JetBrains Mono',monospace;
+}
+html{scroll-behavior:smooth}
+body{background:var(--bg);color:var(--text);font-family:var(--font-display);overflow-x:hidden}
+nav{position:fixed;top:0;left:0;right:0;z-index:100;display:flex;align-items:center;padding:0 5%;height:64px;border-bottom:1px solid var(--border);background:rgba(10,11,13,0.85);backdrop-filter:blur(16px);}
+.nav-logo{display:flex;align-items:center;gap:10px}
+.nav-logo-icon{width:32px;height:32px;background:var(--accent);border-radius:8px;display:flex;align-items:center;justify-content:center;}
+.nav-logo-icon svg{width:18px;height:18px}
+.nav-logo-name{font-size:16px;font-weight:700;letter-spacing:-0.4px}
+.nav-links{display:flex;gap:28px;margin-left:40px}
+.nav-links a{font-size:13px;color:var(--muted);text-decoration:none;transition:color .2s}
+.nav-links a:hover{color:var(--text)}
+.nav-cta{margin-left:auto;display:flex;gap:10px;align-items:center}
+.btn-outline{padding:8px 18px;font-size:13px;font-family:var(--font-display);font-weight:600;background:transparent;border:1px solid var(--border2);border-radius:8px;color:var(--muted);cursor:pointer;transition:all .2s;text-decoration:none;}
+.btn-outline:hover{border-color:var(--text);color:var(--text)}
+.btn-green{padding:8px 20px;font-size:13px;font-family:var(--font-display);font-weight:700;background:var(--accent);border:none;border-radius:8px;color:white;cursor:pointer;transition:all .2s;text-decoration:none;}
+.btn-green:hover{opacity:.85;transform:translateY(-1px)}
+.hero{min-height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:120px 5% 80px;position:relative;overflow:hidden;}
+.hero-grid{position:absolute;inset:0;background-image:linear-gradient(rgba(29,158,117,.04) 1px,transparent 1px),linear-gradient(90deg,rgba(29,158,117,.04) 1px,transparent 1px);background-size:60px 60px;mask-image:radial-gradient(ellipse 80% 60% at 50% 40%,black,transparent);}
+.hero-glow{position:absolute;top:20%;left:50%;transform:translateX(-50%);width:600px;height:300px;background:radial-gradient(ellipse,rgba(29,158,117,.12) 0%,transparent 70%);pointer-events:none;}
+.eyebrow{display:inline-flex;align-items:center;gap:7px;border:1px solid var(--border2);border-radius:20px;padding:6px 14px;font-size:11px;font-family:var(--font-mono);color:var(--accent2);margin-bottom:28px;letter-spacing:.5px;animation:fadeup .6s ease both;}
+.eyebrow-dot{width:5px;height:5px;border-radius:50%;background:var(--accent);animation:pulse 2s infinite}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.3}}
+.hero h1{font-size:clamp(42px,7vw,88px);font-weight:800;line-height:1.0;letter-spacing:-2px;margin-bottom:24px;animation:fadeup .7s .1s ease both;}
+.hero h1 em{font-family:var(--font-serif);font-style:italic;font-weight:400;color:var(--accent);}
+.hero-sub{max-width:520px;font-size:17px;line-height:1.65;color:var(--muted);margin-bottom:40px;animation:fadeup .7s .2s ease both;}
+.hero-cta{display:flex;gap:12px;justify-content:center;flex-wrap:wrap;animation:fadeup .7s .3s ease both;}
+.btn-hero{padding:14px 32px;font-size:15px;font-family:var(--font-display);font-weight:700;background:var(--accent);border:none;border-radius:10px;color:white;cursor:pointer;transition:all .25s;text-decoration:none;}
+.btn-hero:hover{opacity:.85;transform:translateY(-2px)}
+.btn-hero-ghost{padding:14px 28px;font-size:15px;font-family:var(--font-display);font-weight:600;background:transparent;border:1px solid var(--border2);border-radius:10px;color:var(--text);cursor:pointer;transition:all .25s;text-decoration:none;}
+.btn-hero-ghost:hover{border-color:var(--text)}
+.hero-badges{display:flex;gap:20px;justify-content:center;margin-top:48px;flex-wrap:wrap;animation:fadeup .7s .4s ease both;}
+.badge{display:flex;align-items:center;gap:7px;font-size:12px;font-family:var(--font-mono);color:var(--muted);}
+.badge svg{width:14px;height:14px;color:var(--accent)}
+@keyframes fadeup{from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:translateY(0)}}
+.stats-bar{border-top:1px solid var(--border);border-bottom:1px solid var(--border);background:var(--bg2);display:grid;grid-template-columns:repeat(4,1fr);text-align:center;}
+.stat-item{padding:28px 20px;border-right:1px solid var(--border)}
+.stat-item:last-child{border-right:none}
+.stat-num{font-size:32px;font-weight:800;color:var(--accent);letter-spacing:-1px}
+.stat-label{font-size:12px;color:var(--muted);margin-top:4px;font-family:var(--font-mono)}
+.section{padding:100px 5%}
+.section-label{font-size:11px;font-family:var(--font-mono);color:var(--accent);letter-spacing:2px;text-transform:uppercase;margin-bottom:16px;}
+.section-title{font-size:clamp(28px,4vw,44px);font-weight:800;letter-spacing:-1px;line-height:1.1;margin-bottom:16px}
+.section-title em{font-family:var(--font-serif);font-style:italic;font-weight:400}
+.section-sub{font-size:16px;color:var(--muted);line-height:1.65;max-width:520px}
+.features-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:1px;background:var(--border);border:1px solid var(--border);border-radius:16px;overflow:hidden;margin-top:60px;}
+.feature-card{background:var(--bg2);padding:32px 28px;transition:background .2s;}
+.feature-card:hover{background:var(--surface)}
+.feature-icon{width:40px;height:40px;border-radius:10px;display:flex;align-items:center;justify-content:center;margin-bottom:20px;}
+.feature-title{font-size:16px;font-weight:700;margin-bottom:10px;letter-spacing:-.3px}
+.feature-desc{font-size:13px;color:var(--muted);line-height:1.65}
+.how-section{background:var(--bg2);padding:100px 5%}
+.how-grid{display:grid;grid-template-columns:1fr 1fr;gap:80px;align-items:center;max-width:1100px;margin:60px auto 0}
+.step-list{display:flex;flex-direction:column;gap:0}
+.step{display:flex;gap:20px;padding:24px 0;border-bottom:1px solid var(--border);}
+.step:last-child{border-bottom:none}
+.step-num{width:32px;height:32px;border-radius:50%;border:1px solid var(--border2);display:flex;align-items:center;justify-content:center;font-size:12px;font-family:var(--font-mono);color:var(--accent);flex-shrink:0;margin-top:2px;}
+.step-title{font-size:15px;font-weight:600;margin-bottom:6px}
+.step-desc{font-size:13px;color:var(--muted);line-height:1.6}
+.screen-mock{background:var(--surface);border:1px solid var(--border2);border-radius:16px;overflow:hidden;position:relative;}
+.screen-bar{display:flex;align-items:center;gap:6px;padding:12px 16px;background:var(--bg3);border-bottom:1px solid var(--border);}
+.screen-dot{width:8px;height:8px;border-radius:50%}
+.screen-title{font-size:12px;color:var(--muted);margin-left:6px;font-family:var(--font-mono)}
+.msg-mock{padding:16px;display:flex;flex-direction:column;gap:12px}
+.mock-msg{background:var(--bg3);border:1px solid var(--border);border-radius:10px;padding:10px 14px;font-size:12px;line-height:1.5;max-width:80%;}
+.mock-msg.right{align-self:flex-end;background:rgba(29,158,117,.15);border-color:rgba(29,158,117,.3)}
+.mock-ttl{font-size:10px;font-family:var(--font-mono);color:var(--danger);display:flex;align-items:center;gap:5px;margin-top:4px;}
+.ttl-mini-bar{flex:1;height:2px;background:rgba(216,90,48,.2);border-radius:2px;overflow:hidden}
+.ttl-mini-fill{height:100%;background:var(--danger);border-radius:2px}
+.enc-tag{font-size:10px;font-family:var(--font-mono);color:var(--accent);margin-top:4px}
+.pricing-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;margin-top:60px;max-width:960px}
+.price-card{background:var(--surface);border:1px solid var(--border);border-radius:16px;padding:32px 28px;transition:transform .2s;position:relative;}
+.price-card:hover{transform:translateY(-4px)}
+.price-card.featured{border-color:var(--accent)}
+.featured-badge{position:absolute;top:-12px;left:50%;transform:translateX(-50%);background:var(--accent);color:white;font-size:11px;font-weight:700;padding:4px 14px;border-radius:20px;white-space:nowrap;}
+.plan-name{font-size:13px;font-family:var(--font-mono);color:var(--muted);margin-bottom:12px;letter-spacing:.5px;text-transform:uppercase}
+.plan-price{font-size:42px;font-weight:800;letter-spacing:-2px;margin-bottom:4px}
+.plan-price span{font-size:16px;font-weight:400;color:var(--muted)}
+.plan-users{font-size:12px;color:var(--muted);margin-bottom:24px;font-family:var(--font-mono)}
+.plan-features{list-style:none;display:flex;flex-direction:column;gap:10px;margin-bottom:28px}
+.plan-features li{font-size:13px;color:var(--muted);display:flex;gap:8px;align-items:flex-start}
+.plan-features li::before{content:'✓';color:var(--accent);font-weight:700;flex-shrink:0}
+.btn-plan{width:100%;padding:12px;font-size:14px;font-family:var(--font-display);font-weight:700;border-radius:8px;cursor:pointer;transition:all .2s;}
+.btn-plan-default{background:transparent;border:1px solid var(--border2);color:var(--text)}
+.btn-plan-default:hover{border-color:var(--text)}
+.btn-plan-featured{background:var(--accent);border:none;color:white}
+.btn-plan-featured:hover{opacity:.85}
+.testimonials{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;margin-top:60px}
+.testi-card{background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:24px;}
+.testi-quote{font-size:14px;line-height:1.7;color:var(--text);margin-bottom:20px}
+.testi-quote em{font-family:var(--font-serif);font-style:italic;font-size:16px}
+.testi-author{display:flex;align-items:center;gap:10px}
+.testi-av{width:36px;height:36px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;}
+.testi-name{font-size:13px;font-weight:600}
+.testi-role{font-size:11px;color:var(--muted)}
+.cta-section{text-align:center;padding:120px 5%;background:var(--bg2);border-top:1px solid var(--border);}
+.cta-section h2{font-size:clamp(32px,5vw,60px);font-weight:800;letter-spacing:-1.5px;margin-bottom:16px}
+.cta-section h2 em{font-family:var(--font-serif);font-style:italic;font-weight:400;color:var(--accent)}
+.cta-section p{font-size:16px;color:var(--muted);margin-bottom:40px}
+footer{border-top:1px solid var(--border);padding:32px 5%;display:flex;align-items:center;justify-content:space-between;font-size:12px;color:var(--muted);font-family:var(--font-mono);}
+.cancel-section{background:var(--bg);border-top:1px solid var(--border);padding:60px 5%;text-align:center;}
+.cancel-box{max-width:500px;margin:0 auto;background:var(--surface);border:1px solid var(--border);border-radius:16px;padding:32px;}
+.cancel-title{font-size:18px;font-weight:700;margin-bottom:8px}
+.cancel-desc{font-size:13px;color:var(--muted);margin-bottom:24px;line-height:1.6}
+.btn-cancel{padding:12px 28px;font-size:14px;font-family:var(--font-display);font-weight:700;background:transparent;border:1px solid var(--danger);border-radius:8px;color:var(--danger);cursor:pointer;transition:all .2s;}
+.btn-cancel:hover{background:var(--danger);color:white}
+@media(max-width:768px){
+  .nav-links,.nav-cta .btn-outline{display:none}
+  .stats-bar{grid-template-columns:repeat(2,1fr)}
+  .features-grid{grid-template-columns:1fr}
+  .how-grid{grid-template-columns:1fr;gap:40px}
+  .pricing-grid{grid-template-columns:1fr}
+  .testimonials{grid-template-columns:1fr}
+  footer{flex-direction:column;gap:12px;text-align:center}
+}
+#pwa-banner{position:fixed;bottom:24px;left:50%;transform:translateX(-50%);background:#1D9E75;color:#fff;display:none;align-items:center;gap:12px;padding:14px 24px;border-radius:50px;box-shadow:0 8px 32px rgba(0,0,0,0.4);font-family:'Syne',sans-serif;font-size:14px;font-weight:700;cursor:pointer;z-index:9999;white-space:nowrap;border:none;animation:slideup .4s ease;}
+@keyframes slideup{from{opacity:0;transform:translateX(-50%) translateY(20px)}to{opacity:1;transform:translateX(-50%) translateY(0)}}
+#pwa-banner:hover{opacity:.9;}
+#pwa-close{background:rgba(255,255,255,.2);border:none;color:#fff;width:22px;height:22px;border-radius:50%;cursor:pointer;font-size:13px;display:flex;align-items:center;justify-content:center;margin-left:4px;}
+</style>
+</head>
+<body>
+
+<nav>
+  <div class="nav-logo">
+    <div class="nav-logo-icon">
+      <svg viewBox="0 0 18 18" fill="none"><rect x="2" y="8" width="14" height="9" rx="2.5" fill="white" fill-opacity=".9"/><path d="M5.5 8V6A3.5 3.5 0 0112.5 6v2" stroke="white" stroke-width="1.6" stroke-linecap="round"/><circle cx="9" cy="12.5" r="1.5" fill="#1D9E75"/></svg>
+    </div>
+    <span class="nav-logo-name">VaultChat</span>
+  </div>
+  <div class="nav-links">
+    <a href="#recursos">Recursos</a>
+    <a href="#como-funciona">Como funciona</a>
+    <a href="#precos">Preços</a>
+    <a href="#cancelar">Cancelar</a>
+  </div>
+  <div class="nav-cta">
+    <a href="#precos" class="btn-outline">Ver planos</a>
+    <a href="login.html" class="btn-green">Testar grátis</a>
+  </div>
+</nav>
+
+<!-- HERO -->
+<section class="hero">
+  <div class="hero-grid"></div>
+  <div class="hero-glow"></div>
+  <div class="eyebrow">
+    <div class="eyebrow-dot"></div>
+    Criptografia E2E · Zero log em servidor
+  </div>
+  <h1>Comunicação<br/><em>que desaparece.</em><br/>Segurança que fica.</h1>
+  <p class="hero-sub">VaultChat é o app de mensagens seguras para equipes que lidam com informações confidenciais. Criptografia AES-256, mensagens com expiração automática, zero rastros.</p>
+  <div class="hero-cta">
+    <a href="login.html" class="btn-hero">Começar agora — grátis por 14 dias</a>
+    <a href="#como-funciona" class="btn-hero-ghost">Ver como funciona →</a>
+  </div>
+  <div class="hero-badges">
+    <div class="badge">
+      <svg viewBox="0 0 14 14" fill="none"><rect x="1" y="7" width="12" height="7" rx="1.5" stroke="currentColor" stroke-width="1.2"/><path d="M3.5 7V5a3.5 3.5 0 017 0v2" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/></svg>
+      AES-256 + Signal Protocol
+    </div>
+    <div class="badge">
+      <svg viewBox="0 0 14 14" fill="none"><circle cx="7" cy="7" r="5.5" stroke="currentColor" stroke-width="1.2"/><path d="M7 4v3.5l2 1.5" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/></svg>
+      Mensagens com TTL
+    </div>
+    <div class="badge">
+      <svg viewBox="0 0 14 14" fill="none"><path d="M7 1L1 4v3c0 3.3 2.6 6.4 6 7 3.4-.6 6-3.7 6-7V4L7 1z" stroke="currentColor" stroke-width="1.2"/></svg>
+      LGPD / ISO 27001
+    </div>
+    <div class="badge">
+      <svg viewBox="0 0 14 14" fill="none"><rect x="1" y="1" width="12" height="12" rx="2" stroke="currentColor" stroke-width="1.2"/><path d="M4 7h6M4 4.5h6M4 9.5h4" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/></svg>
+      Sem logs no servidor
+    </div>
+  </div>
+</section>
+
+<!-- STATS -->
+<div class="stats-bar">
+  <div class="stat-item"><div class="stat-num">256-bit</div><div class="stat-label">Criptografia AES</div></div>
+  <div class="stat-item"><div class="stat-num">0</div><div class="stat-label">Logs armazenados</div></div>
+  <div class="stat-item"><div class="stat-num">100%</div><div class="stat-label">E2E ponta a ponta</div></div>
+  <div class="stat-item"><div class="stat-num">LGPD</div><div class="stat-label">Em conformidade</div></div>
+</div>
+
+<!-- FEATURES -->
+<section class="section" id="recursos">
+  <div style="max-width:1100px;margin:0 auto">
+    <div class="section-label">Recursos</div>
+    <h2 class="section-title">Tudo que sua equipe precisa.<br/><em>Nada que você não quer que fique.</em></h2>
+    <p class="section-sub">Projetado para escritórios de advocacia, clínicas, contabilidades e empresas que lidam com dados sensíveis.</p>
+    <div class="features-grid">
+      <div class="feature-card">
+        <div class="feature-icon" style="background:rgba(29,158,117,.15)">
+          <svg width="20" height="20" viewBox="0 0 20 20" fill="none"><rect x="2" y="9" width="16" height="10" rx="2" stroke="#1D9E75" stroke-width="1.5"/><path d="M6 9V7a4 4 0 018 0v2" stroke="#1D9E75" stroke-width="1.5" stroke-linecap="round"/><circle cx="10" cy="14" r="1.5" fill="#1D9E75"/></svg>
+        </div>
+        <div class="feature-title">Criptografia E2E real</div>
+        <div class="feature-desc">Protocolo Signal + AES-256. As chaves só existem nos dispositivos dos usuários. Nem nós conseguimos ler suas mensagens.</div>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon" style="background:rgba(216,90,48,.1)">
+          <svg width="20" height="20" viewBox="0 0 20 20" fill="none"><circle cx="10" cy="10" r="7.5" stroke="#D85A30" stroke-width="1.5"/><path d="M10 6v5l3 2" stroke="#D85A30" stroke-width="1.5" stroke-linecap="round"/></svg>
+        </div>
+        <div class="feature-title">TTL por mensagem</div>
+        <div class="feature-desc">Configure expiração por mensagem: 1h, 6h, 24h, 7 dias ou nunca. Após o prazo, a mensagem é destruída sem possibilidade de recuperação.</div>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon" style="background:rgba(200,168,75,.1)">
+          <svg width="20" height="20" viewBox="0 0 20 20" fill="none"><path d="M10 2L3 5.5v5c0 4.7 3.1 9.1 7 10 3.9-.9 7-5.3 7-10v-5L10 2z" stroke="#C8A84B" stroke-width="1.5"/></svg>
+        </div>
+        <div class="feature-title">Salas por projeto</div>
+        <div class="feature-desc">Crie salas isoladas para cada cliente, processo ou departamento. Controle granular de acesso por membro.</div>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon" style="background:rgba(29,158,117,.15)">
+          <svg width="20" height="20" viewBox="0 0 20 20" fill="none"><rect x="2" y="2" width="16" height="16" rx="3" stroke="#1D9E75" stroke-width="1.5"/><path d="M6 10h8M6 6.5h8M6 13.5h5" stroke="#1D9E75" stroke-width="1.5" stroke-linecap="round"/></svg>
+        </div>
+        <div class="feature-title">Zero log no servidor</div>
+        <div class="feature-desc">Histórico salvo somente nos dispositivos autorizados. Nosso servidor não armazena conteúdo — apenas metadados mínimos de roteamento.</div>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon" style="background:rgba(83,74,183,.15)">
+          <svg width="20" height="20" viewBox="0 0 20 20" fill="none"><path d="M4 4h12v8H11l-4 3v-3H4V4z" stroke="#534AB7" stroke-width="1.5" stroke-linejoin="round"/></svg>
+        </div>
+        <div class="feature-title">Bloqueio de screenshot</div>
+        <div class="feature-desc">DRM nativo em iOS e Android bloqueia capturas de tela. Alerta imediato se tentativa for detectada.</div>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon" style="background:rgba(216,90,48,.1)">
+          <svg width="20" height="20" viewBox="0 0 20 20" fill="none"><circle cx="10" cy="10" r="7.5" stroke="#D85A30" stroke-width="1.5"/><path d="M10 6v4l2.5 2.5" stroke="#D85A30" stroke-width="1.5" stroke-linecap="round"/></svg>
+        </div>
+        <div class="feature-title">Alerta de intrusão</div>
+        <div class="feature-desc">Notificação instantânea para todos os membros quando um novo dispositivo faz login em qualquer conta da sala.</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- HOW IT WORKS -->
+<section class="how-section" id="como-funciona">
+  <div style="max-width:1100px;margin:0 auto">
+    <div class="section-label">Como funciona</div>
+    <h2 class="section-title">Simples para usar.<br/><em>Impossível de vazar.</em></h2>
+    <div class="how-grid">
+      <div class="step-list">
+        <div class="step"><div class="step-num">01</div><div><div class="step-title">Crie sua organização</div><div class="step-desc">Registre sua empresa em menos de 2 minutos. Convide membros por e-mail — cada um instala o app e gera suas chaves locais.</div></div></div>
+        <div class="step"><div class="step-num">02</div><div><div class="step-title">Crie salas por projeto</div><div class="step-desc">Jurídico, RH, Financeiro, M&A — cada sala tem controle de acesso independente. Convide apenas quem precisa ver.</div></div></div>
+        <div class="step"><div class="step-num">03</div><div><div class="step-title">Configure a expiração</div><div class="step-desc">Defina o TTL padrão da sala ou por mensagem individual. Após o prazo, a mensagem é destruída em todos os dispositivos.</div></div></div>
+        <div class="step"><div class="step-num">04</div><div><div class="step-title">Comunique-se com segurança</div><div class="step-desc">Mensagens, arquivos e documentos — tudo criptografado E2E. Sem rastros no servidor. Sem surpresas.</div></div></div>
+      </div>
+      <div class="screen-mock">
+        <div class="screen-bar">
+          <div class="screen-dot" style="background:#ff5f57"></div>
+          <div class="screen-dot" style="background:#ffbd2e"></div>
+          <div class="screen-dot" style="background:#28c840"></div>
+          <span class="screen-title">VaultChat · Jurídico — NDA</span>
+        </div>
+        <div class="msg-mock">
+          <div class="mock-msg">Cláusula 4.2 aprovada pelo sócio. Podemos assinar.<div class="enc-tag">🔒 criptografado</div><div class="mock-ttl"><svg width="9" height="9" viewBox="0 0 9 9" fill="none"><circle cx="4.5" cy="4.5" r="3.5" stroke="currentColor" stroke-width="1.1"/><path d="M4.5 2.5v2.2l1.2.8" stroke="currentColor" stroke-width="1.1" stroke-linecap="round"/></svg>expira em 18h 32min<div class="ttl-mini-bar"><div class="ttl-mini-fill" style="width:77%"></div></div></div></div>
+          <div class="mock-msg right">Confirmado. Gerando link de assinatura seguro agora.<div class="enc-tag" style="color:rgba(159,221,204,.8)">🔒 enviado · E2E</div></div>
+          <div class="mock-msg">Esta conversa expira em 24h. Zero backup remoto.<div class="enc-tag">🔒 criptografado</div><div class="mock-ttl">expira em 23h 47min<div class="ttl-mini-bar"><div class="ttl-mini-fill" style="width:99%"></div></div></div></div>
+          <div class="mock-msg right">Perfeito. Só os 4 membros desta sala têm acesso.<div class="enc-tag" style="color:rgba(159,221,204,.8)">🔒 enviado · E2E</div></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- PRICING -->
+<section class="section" id="precos">
+  <div style="max-width:1100px;margin:0 auto">
+    <div class="section-label">Preços</div>
+    <h2 class="section-title">Planos para cada tamanho.<br/><em>Segurança em todos.</em></h2>
+    <p class="section-sub">14 dias de teste grátis em qualquer plano. Sem cartão de crédito.</p>
+    <div class="pricing-grid">
+      <div class="price-card">
+        <div class="plan-name">Starter</div>
+        <div class="plan-price">R$197<span>/mês</span></div>
+        <div class="plan-users">Até 5 usuários</div>
+        <ul class="plan-features">
+          <li>Criptografia AES-256 E2E</li>
+          <li>TTL por mensagem</li>
+          <li>Até 10 salas simultâneas</li>
+          <li>Bloqueio de screenshot</li>
+          <li>Suporte por e-mail</li>
+        </ul>
+        <a href="login.html" class="btn-plan btn-plan-default" style="display:block;text-align:center;text-decoration:none">Testar grátis →</a>
+      </div>
+      <div class="price-card featured">
+        <div class="featured-badge">MAIS POPULAR</div>
+        <div class="plan-name">Business</div>
+        <div class="plan-price">R$597<span>/mês</span></div>
+        <div class="plan-users">Até 25 usuários</div>
+        <ul class="plan-features">
+          <li>Tudo do Starter</li>
+          <li>Salas ilimitadas</li>
+          <li>Alerta de intrusão</li>
+          <li>Compartilhamento de arquivos criptografado</li>
+          <li>Modo offline com sync manual</li>
+          <li>Suporte prioritário</li>
+        </ul>
+        <a href="login.html" class="btn-plan btn-plan-featured" style="display:block;text-align:center;text-decoration:none">Testar grátis →</a>
+      </div>
+      <div class="price-card">
+        <div class="plan-name">Enterprise</div>
+        <div class="plan-price">R$1997<span>/mês</span></div>
+        <div class="plan-users">Usuários ilimitados</div>
+        <ul class="plan-features">
+          <li>Tudo do Business</li>
+          <li>Deploy no servidor próprio (on-premise)</li>
+          <li>SSO / SAML integração</li>
+          <li>Auditoria de acesso (LGPD)</li>
+          <li>SLA 99.9% + suporte dedicado</li>
+          <li>Treinamento e onboarding</li>
+        </ul>
+        <a href="mailto:contato@vaultchat.com.br" class="btn-plan btn-plan-default" style="display:block;text-align:center;text-decoration:none">Falar com vendas →</a>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- TESTIMONIALS -->
+<section class="section" style="padding-top:0">
+  <div style="max-width:1100px;margin:0 auto">
+    <div class="section-label">Depoimentos</div>
+    <h2 class="section-title">Quem já usa <em>não volta atrás.</em></h2>
+    <div class="testimonials">
+      <div class="testi-card"><div class="testi-quote">"Nossa equipe jurídica trocou o WhatsApp pelo VaultChat. <em>A diferença em segurança é absurda.</em> Clientes e sócios ficaram mais tranquilos."</div><div class="testi-author"><div class="testi-av" style="background:rgba(29,158,117,.15);color:#9FDDCC">RS</div><div><div class="testi-name">Ricardo S.</div><div class="testi-role">Sócio — Escritório de Advocacia</div></div></div></div>
+      <div class="testi-card"><div class="testi-quote">"Lidamos com dados médicos diariamente. <em>VaultChat é a única solução</em> que nos deixou 100% conformes com a LGPD sem complicar o dia a dia."</div><div class="testi-author"><div class="testi-av" style="background:rgba(83,74,183,.15);color:#AFA9EC">CM</div><div><div class="testi-name">Camila M.</div><div class="testi-role">Diretora de TI — Rede de Clínicas</div></div></div></div>
+      <div class="testi-card"><div class="testi-quote">"Em M&A, qualquer vazamento pode custar milhões. <em>Com o TTL de mensagens</em>, a equipe de due diligence se comunica sem deixar rastros."</div><div class="testi-author"><div class="testi-av" style="background:rgba(200,168,75,.1);color:#C8A84B">FP</div><div><div class="testi-name">Felipe P.</div><div class="testi-role">CFO — Consultoria de M&A</div></div></div></div>
+    </div>
+  </div>
+</section>
+
+<!-- CTA FINAL -->
+<section class="cta-section">
+  <h2>Sua equipe merece<br/><em>segurança de verdade.</em></h2>
+  <p>Comece agora. 14 dias grátis. Cancele quando quiser.</p>
+  <div style="display:flex;gap:12px;justify-content:center;flex-wrap:wrap">
+    <a href="login.html" class="btn-hero">Começar 14 dias grátis</a>
+    <a href="#precos" class="btn-hero-ghost">Ver todos os planos</a>
+  </div>
+</section>
+
+<!-- CANCELAR ASSINATURA -->
+<section class="cancel-section" id="cancelar">
+  <div class="cancel-box">
+    <div style="font-size:32px;margin-bottom:12px">😔</div>
+    <div class="cancel-title">Cancelar assinatura</div>
+    <div class="cancel-desc">Sentiremos sua falta! Ao cancelar, você perderá acesso ao VaultChat ao fim do período já pago. Seus dados serão apagados em 30 dias. Tem certeza?</div>
+    <div style="display:flex;gap:12px;justify-content:center;flex-wrap:wrap">
+      <a href="#precos" class="btn-plan btn-plan-default" style="text-decoration:none;padding:12px 24px">Manter assinatura</a>
+      <button class="btn-cancel" onclick="cancelarAssinatura()">Confirmar cancelamento</button>
+    </div>
+    <div id="cancelMsg" style="display:none;margin-top:16px;font-size:13px;color:var(--muted)">✅ Solicitação enviada. Você receberá um e-mail de confirmação em breve.</div>
+  </div>
+</section>
+
+<footer>
+  <div>© 2025 VaultChat. Todos os direitos reservados.</div>
+  <div style="display:flex;gap:24px">
+    <a href="#" style="color:var(--muted);text-decoration:none">Privacidade</a>
+    <a href="#" style="color:var(--muted);text-decoration:none">Termos</a>
+    <a href="#" style="color:var(--muted);text-decoration:none">LGPD</a>
+    <a href="#cancelar" style="color:var(--danger);text-decoration:none">Cancelar plano</a>
+  </div>
+</footer>
+
+<button id="pwa-banner" onclick="installPWA()">
+  🔒 Instalar VaultChat como app
+  <button id="pwa-close" onclick="event.stopPropagation();document.getElementById('pwa-banner').style.display='none'">✕</button>
+</button>
+
+<script>
+function cancelarAssinatura(){
+  const user=JSON.parse(localStorage.getItem('vc_user')||'{}');
+  document.getElementById('cancelMsg').style.display='block';
+  document.querySelector('.btn-cancel').disabled=true;
+  document.querySelector('.btn-cancel').textContent='Solicitação enviada';
+  document.querySelector('.btn-cancel').style.opacity='.5';
+}
+
+if('serviceWorker' in navigator){
+  window.addEventListener('load',()=>{
+    navigator.serviceWorker.register('/sw.js')
+      .then(()=>console.log('[VaultChat] SW registrado'))
+      .catch(e=>console.log('[VaultChat] SW erro:',e));
+  });
+}
+
+let deferredPrompt;
+window.addEventListener('beforeinstallprompt',(e)=>{
+  e.preventDefault();deferredPrompt=e;
+  document.getElementById('pwa-banner').style.display='flex';
+});
+
+function installPWA(){
+  if(!deferredPrompt)return;
+  deferredPrompt.prompt();
+  deferredPrompt.userChoice.then(()=>{
+    deferredPrompt=null;
+    document.getElementById('pwa-banner').style.display='none';
+  });
+}
+
+window.addEventListener('appinstalled',()=>{
+  document.getElementById('pwa-banner').style.display='none';
+});
+</script>
+</body>
+</html>

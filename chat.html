@@ -1,0 +1,307 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>VaultChat — Chat Seguro</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&display=swap" rel="stylesheet"/>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{background:#0A0B0D;color:#F0EEE8;font-family:'Syne',sans-serif;height:100vh;display:flex;flex-direction:column;user-select:none}
+.header{background:#0F1114;border-bottom:0.5px solid #2A2D38;padding:12px 16px;display:flex;align-items:center;justify-content:space-between}
+.header-left{display:flex;align-items:center;gap:10px}
+.logo-icon{width:32px;height:32px;background:#1D9E75;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:16px}
+.room-name{font-weight:700;font-size:15px}
+.room-ttl{font-size:11px;color:#7A7D8A}
+.btn-small{background:#161820;border:0.5px solid #2A2D38;border-radius:8px;padding:6px 12px;color:#F0EEE8;font-size:12px;font-family:'Syne',sans-serif;cursor:pointer}
+.btn-danger{border-color:#D85A30;color:#D85A30}
+.rooms-bar{background:#0F1114;border-bottom:0.5px solid #2A2D38;padding:8px 16px;display:flex;gap:8px;overflow-x:auto}
+.room-chip{background:#161820;border:0.5px solid #2A2D38;border-radius:20px;padding:5px 12px;font-size:12px;cursor:pointer;white-space:nowrap;transition:all .2s}
+.room-chip.active{background:#1D9E75;border-color:#1D9E75;color:#fff;font-weight:700}
+.add-room{background:none;border:0.5px dashed #2A2D38;border-radius:20px;padding:5px 12px;font-size:12px;color:#7A7D8A;cursor:pointer;font-family:'Syne',sans-serif}
+.messages{flex:1;overflow-y:auto;padding:16px;display:flex;flex-direction:column;gap:10px}
+.msg-bubble{max-width:75%;padding:10px 14px;border-radius:14px;font-size:14px;line-height:1.5;position:relative}
+.msg-bubble.mine{background:#1D9E75;align-self:flex-end;border-bottom-right-radius:4px}
+.msg-bubble.other{background:#161820;border:0.5px solid #2A2D38;align-self:flex-start;border-bottom-left-radius:4px}
+.msg-meta{font-size:10px;opacity:.7;margin-top:4px;display:flex;align-items:center;gap:6px}
+.ttl-badge{background:rgba(0,0,0,.3);border-radius:10px;padding:2px 6px;font-size:10px}
+.ttl-urgent{background:rgba(216,90,48,.4);color:#ffaa88}
+.msg-sender{font-size:11px;font-weight:700;color:#1D9E75;margin-bottom:3px}
+.enc-badge{font-size:10px;color:#7A7D8A;display:flex;align-items:center;gap:4px;padding:4px 8px;background:#161820;border-radius:8px;border:0.5px solid #2A2D38;align-self:center;margin:8px 0}
+.enc-dot{width:5px;height:5px;border-radius:50%;background:#1D9E75;animation:pulse 2s infinite}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.3}}
+.input-area{background:#0F1114;border-top:0.5px solid #2A2D38;padding:12px 16px;display:flex;flex-direction:column;gap:8px}
+.ttl-selector{display:flex;align-items:center;gap:8px;font-size:12px;color:#7A7D8A}
+.ttl-selector select{background:#161820;border:0.5px solid #2A2D38;border-radius:8px;padding:4px 8px;color:#F0EEE8;font-family:'Syne',sans-serif;font-size:12px;outline:none}
+.input-row{display:flex;gap:8px}
+.msg-input{flex:1;background:#161820;border:0.5px solid #2A2D38;border-radius:12px;padding:12px 14px;color:#F0EEE8;font-size:14px;font-family:'Syne',sans-serif;outline:none;resize:none;max-height:100px}
+.msg-input:focus{border-color:#1D9E75}
+.send-btn{background:#1D9E75;border:none;border-radius:12px;width:44px;height:44px;cursor:pointer;font-size:18px;color:white}
+.modal{position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,.8);display:none;align-items:center;justify-content:center;z-index:1000}
+.modal-card{background:#0F1114;border:0.5px solid #2A2D38;border-radius:18px;padding:28px;width:90%;max-width:360px}
+.modal-title{font-size:18px;font-weight:800;margin-bottom:16px}
+.field{margin-bottom:14px}
+.field label{display:block;font-size:12px;color:#7A7D8A;margin-bottom:6px;font-weight:600;text-transform:uppercase}
+.field input,.field select{width:100%;background:#161820;border:0.5px solid #2A2D38;border-radius:10px;padding:12px 14px;color:#F0EEE8;font-size:14px;font-family:'Syne',sans-serif;outline:none}
+.btn-full{width:100%;padding:13px;background:#1D9E75;border:none;border-radius:12px;color:#fff;font-size:15px;font-family:'Syne',sans-serif;font-weight:800;cursor:pointer;margin-top:4px}
+.empty-state{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;color:#7A7D8A;gap:12px;text-align:center;padding:32px}
+.screenshot-overlay{position:fixed;top:0;left:0;right:0;bottom:0;background:#0A0B0D;z-index:99999;display:none;align-items:center;justify-content:center;flex-direction:column;gap:16px}
+.screenshot-overlay.show{display:flex}
+.online-dot{width:8px;height:8px;border-radius:50%;background:#1D9E75;display:inline-block;margin-right:4px;animation:pulse 2s infinite}
+</style>
+</head>
+<body>
+
+<div class="screenshot-overlay" id="screenshotOverlay">
+  <div style="font-size:48px">🔒</div>
+  <div style="font-size:18px;font-weight:800">Conteúdo protegido</div>
+  <div style="font-size:14px;color:#7A7D8A">Screenshot bloqueado</div>
+</div>
+
+<div class="header">
+  <div class="header-left">
+    <div class="logo-icon">🔒</div>
+    <div>
+      <div class="room-name" id="currentRoomName">VaultChat</div>
+      <div class="room-ttl" id="currentRoomTTL"><span class="online-dot"></span>Selecione uma sala</div>
+    </div>
+  </div>
+  <div style="display:flex;gap:8px">
+    <button class="btn-small" onclick="showNewRoom()">+ Sala</button>
+    <button class="btn-small btn-danger" onclick="clearRoom()">Limpar</button>
+    <button class="btn-small" onclick="goLogin()">Sair</button>
+  </div>
+</div>
+
+<div class="rooms-bar" id="roomsBar">
+  <button class="add-room" onclick="showNewRoom()">+ Nova sala</button>
+</div>
+
+<div class="messages" id="messages">
+  <div class="empty-state" id="emptyState">
+    <div style="font-size:48px">🔐</div>
+    <div style="font-weight:700;font-size:16px">Nenhuma sala selecionada</div>
+    <div style="font-size:13px">Crie uma sala para começar</div>
+    <button class="btn-full" style="max-width:200px;margin-top:8px" onclick="showNewRoom()">Criar sala</button>
+  </div>
+</div>
+
+<div class="input-area" id="inputArea" style="display:none">
+  <div class="ttl-selector">
+    🕐 Expira em:
+    <select id="ttlSelect">
+      <option value="3600000">1 hora</option>
+      <option value="21600000">6 horas</option>
+      <option value="86400000" selected>24 horas</option>
+      <option value="259200000">3 dias</option>
+      <option value="604800000">7 dias</option>
+      <option value="0">Nunca</option>
+    </select>
+  </div>
+  <div class="input-row">
+    <textarea class="msg-input" id="msgInput" placeholder="Mensagem segura..." rows="1" onkeydown="handleKey(event)"></textarea>
+    <button class="send-btn" onclick="sendMessage()">➤</button>
+  </div>
+</div>
+
+<div class="modal" id="newRoomModal">
+  <div class="modal-card">
+    <div class="modal-title">🏠 Nova Sala</div>
+    <div class="field">
+      <label>Nome da sala</label>
+      <input type="text" id="roomNameInput" placeholder="Ex: Jurídico, RH, M&A..."/>
+    </div>
+    <div class="field">
+      <label>TTL padrão</label>
+      <select id="roomTTLInput">
+        <option value="3600000">1 hora</option>
+        <option value="21600000">6 horas</option>
+        <option value="86400000" selected>24 horas</option>
+        <option value="259200000">3 dias</option>
+        <option value="604800000">7 dias</option>
+        <option value="0">Nunca</option>
+      </select>
+    </div>
+    <button class="btn-full" onclick="createRoom()">Criar sala</button>
+    <button class="btn-small" style="width:100%;margin-top:8px;text-align:center" onclick="closeModal()">Cancelar</button>
+  </div>
+</div>
+
+<script>
+// Proteção screenshot
+document.addEventListener('keyup',e=>{
+  if(e.key==='PrintScreen'){
+    document.getElementById('screenshotOverlay').classList.add('show');
+    setTimeout(()=>document.getElementById('screenshotOverlay').classList.remove('show'),3000);
+  }
+});
+document.addEventListener('visibilitychange',()=>{
+  if(document.hidden){
+    document.getElementById('screenshotOverlay').classList.add('show');
+    setTimeout(()=>document.getElementById('screenshotOverlay').classList.remove('show'),1500);
+  }
+});
+
+// Supabase
+const SUPABASE_URL='https://exkspbpamuqzzrbpbflx.supabase.co';
+const SUPABASE_KEY='sb_publishable_AqEz3N2R5apg8tGG0rDu5w_2L92h4ya';
+const sb=supabase.createClient(SUPABASE_URL,SUPABASE_KEY);
+
+const user=JSON.parse(localStorage.getItem('vc_user')||'{"name":"Usuário","email":""}');
+let currentRoom=null;
+let realtimeSub=null;
+
+if(!localStorage.getItem('vc_token'))window.location.href='login.html';
+
+async function loadRooms(){
+  const{data}=await sb.from('rooms').select('*').order('created_at');
+  const bar=document.getElementById('roomsBar');
+  bar.innerHTML='<button class="add-room" onclick="showNewRoom()">+ Nova sala</button>';
+  if(data)data.forEach(r=>{
+    const chip=document.createElement('div');
+    chip.className='room-chip'+(currentRoom===r.id?' active':'');
+    chip.textContent=r.name;
+    chip.onclick=()=>selectRoom(r);
+    bar.appendChild(chip);
+  });
+}
+
+async function selectRoom(room){
+  currentRoom=room.id;
+  document.getElementById('currentRoomName').textContent=room.name;
+  document.getElementById('currentRoomTTL').innerHTML='<span class="online-dot"></span>'+ttlLabel(room.ttl)+' · E2E ativo';
+  document.getElementById('inputArea').style.display='flex';
+  document.getElementById('ttlSelect').value=room.ttl||86400000;
+  document.getElementById('emptyState').style.display='none';
+  loadRooms();
+  await loadMessages();
+  subscribeRoom();
+}
+
+async function loadMessages(){
+  if(!currentRoom)return;
+  const now=new Date().toISOString();
+  // Remove expiradas
+  await sb.from('messages').delete().eq('room_id',currentRoom).lt('expires_at',now).not('expires_at','is',null);
+  const{data}=await sb.from('messages').select('*').eq('room_id',currentRoom).order('sent_at');
+  renderMessages(data||[]);
+}
+
+function renderMessages(msgs){
+  const container=document.getElementById('messages');
+  container.innerHTML='';
+  const enc=document.createElement('div');
+  enc.className='enc-badge';
+  enc.innerHTML='<div class="enc-dot"></div> Criptografia E2E · Mensagens expiram automaticamente';
+  container.appendChild(enc);
+  msgs.forEach(msg=>{
+    const isMine=msg.sender===user.name;
+    const bubble=document.createElement('div');
+    bubble.className='msg-bubble '+(isMine?'mine':'other');
+    if(!isMine){
+      const s=document.createElement('div');
+      s.className='msg-sender';s.textContent=msg.sender;
+      bubble.appendChild(s);
+    }
+    const t=document.createElement('div');
+    t.textContent=msg.text;bubble.appendChild(t);
+    const meta=document.createElement('div');
+    meta.className='msg-meta';
+    const time=new Date(msg.sent_at).toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'});
+    meta.innerHTML='<span>'+time+'</span>';
+    if(msg.expires_at){
+      const diff=new Date(msg.expires_at)-new Date();
+      const urgent=diff<3600000;
+      const badge=document.createElement('span');
+      badge.className='ttl-badge'+(urgent?' ttl-urgent':'');
+      badge.textContent='⏱ '+timeLeft(msg.expires_at);
+      meta.appendChild(badge);
+    }
+    bubble.appendChild(meta);
+    container.appendChild(bubble);
+  });
+  container.scrollTop=container.scrollHeight;
+}
+
+function subscribeRoom(){
+  if(realtimeSub)realtimeSub.unsubscribe();
+  realtimeSub=sb.channel('room-'+currentRoom)
+    .on('postgres_changes',{event:'INSERT',schema:'public',table:'messages',filter:'room_id=eq.'+currentRoom},()=>loadMessages())
+    .on('postgres_changes',{event:'DELETE',schema:'public',table:'messages',filter:'room_id=eq.'+currentRoom},()=>loadMessages())
+    .subscribe();
+}
+
+async function sendMessage(){
+  if(!currentRoom)return;
+  const input=document.getElementById('msgInput');
+  const text=input.value.trim();
+  if(!text)return;
+  const ttl=parseInt(document.getElementById('ttlSelect').value);
+  const expires_at=ttl>0?new Date(Date.now()+ttl).toISOString():null;
+  await sb.from('messages').insert({
+    id:Date.now().toString(),
+    room_id:currentRoom,
+    sender:user.name,
+    text,
+    sent_at:new Date().toISOString(),
+    expires_at
+  });
+  input.value='';
+}
+
+function handleKey(e){if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();sendMessage();}}
+
+function showNewRoom(){
+  document.getElementById('newRoomModal').style.display='flex';
+  document.getElementById('roomNameInput').focus();
+}
+function closeModal(){document.getElementById('newRoomModal').style.display='none';}
+
+async function createRoom(){
+  const name=document.getElementById('roomNameInput').value.trim();
+  if(!name)return;
+  const ttl=parseInt(document.getElementById('roomTTLInput').value);
+  const id='room_'+Date.now();
+  const{data}=await sb.from('rooms').insert({id,name,ttl,created_at:new Date().toISOString()}).select().single();
+  closeModal();
+  document.getElementById('roomNameInput').value='';
+  await loadRooms();
+  if(data)selectRoom(data);
+}
+
+async function clearRoom(){
+  if(!currentRoom)return;
+  if(confirm('Apagar todas as mensagens desta sala?')){
+    await sb.from('messages').delete().eq('room_id',currentRoom);
+    loadMessages();
+  }
+}
+
+function ttlLabel(ms){
+  if(!ms||ms==0)return'Nunca expira';
+  if(ms<=3600000)return'1h TTL';
+  if(ms<=21600000)return'6h TTL';
+  if(ms<=86400000)return'24h TTL';
+  if(ms<=259200000)return'3 dias TTL';
+  return'7 dias TTL';
+}
+
+function timeLeft(expiresAt){
+  const diff=new Date(expiresAt)-new Date();
+  if(diff<=0)return'Expirada';
+  const h=Math.floor(diff/3600000);
+  const m=Math.floor((diff%3600000)/60000);
+  if(h>0)return h+'h '+m+'m';
+  return m+'m';
+}
+
+function goLogin(){window.location.href='login.html';}
+
+// TTL cleanup a cada minuto
+setInterval(()=>{if(currentRoom)loadMessages();},60000);
+
+loadRooms();
+</script>
+</body>
+</html>

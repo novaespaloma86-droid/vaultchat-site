@@ -1,0 +1,236 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>VaultChat — Login</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&display=swap" rel="stylesheet"/>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{background:#0A0B0D;color:#F0EEE8;font-family:'Syne',sans-serif;min-height:100vh;display:flex;align-items:center;justify-content:center;padding:20px;flex-direction:column;gap:16px}
+.lang-bar{display:flex;gap:8px;flex-wrap:wrap;justify-content:center}
+.lang-btn{background:#0F1114;border:0.5px solid #2A2D38;border-radius:20px;padding:6px 14px;font-size:12px;color:#7A7D8A;cursor:pointer;font-family:'Syne',sans-serif;transition:all .2s}
+.lang-btn.active{background:#1D9E75;border-color:#1D9E75;color:#fff;font-weight:700}
+.card{background:#0F1114;border:0.5px solid #2A2D38;border-radius:18px;padding:36px;width:100%;max-width:400px}
+.logo{display:flex;align-items:center;gap:10px;justify-content:center;margin-bottom:32px}
+.logo-icon{width:40px;height:40px;background:#1D9E75;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:20px}
+.logo-name{font-size:22px;font-weight:800}
+.tabs{display:flex;background:#161820;border-radius:10px;padding:4px;margin-bottom:24px}
+.tab{flex:1;padding:9px;text-align:center;border-radius:7px;cursor:pointer;font-size:14px;color:#7A7D8A;font-weight:500;transition:all .2s}
+.tab.active{background:#1A1D24;color:#F0EEE8;font-weight:700}
+.field{margin-bottom:14px}
+.field label{display:block;font-size:12px;color:#7A7D8A;margin-bottom:6px;font-weight:600;text-transform:uppercase}
+.field input{width:100%;background:#161820;border:0.5px solid #2A2D38;border-radius:10px;padding:13px 14px;color:#F0EEE8;font-size:15px;font-family:'Syne',sans-serif;outline:none;transition:border .2s}
+.field input:focus{border-color:#1D9E75}
+.btn{width:100%;padding:14px;background:#1D9E75;border:none;border-radius:12px;color:#fff;font-size:16px;font-family:'Syne',sans-serif;font-weight:800;cursor:pointer;margin-top:8px;transition:opacity .2s}
+.btn:hover{opacity:.85}
+.btn:disabled{opacity:.5;cursor:not-allowed}
+.link-btn{background:none;border:none;color:#1D9E75;font-size:13px;font-family:'Syne',sans-serif;cursor:pointer;text-decoration:underline;margin-top:12px;display:block;text-align:center;width:100%}
+.msg{padding:12px;border-radius:8px;font-size:13px;margin-top:12px;text-align:center;display:none}
+.msg.error{background:rgba(216,90,48,.15);border:0.5px solid #D85A30;color:#D85A30}
+.msg.success{background:rgba(29,158,117,.15);border:0.5px solid #1D9E75;color:#9FE1CB}
+.enc{display:flex;align-items:center;justify-content:center;gap:6px;margin-top:20px;font-size:11px;color:#7A7D8A;font-family:monospace}
+.enc-dot{width:5px;height:5px;border-radius:50%;background:#1D9E75;animation:pulse 2s infinite}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.3}}
+.dashboard{display:none;text-align:center}
+.user-avatar{width:64px;height:64px;border-radius:50%;background:rgba(29,158,117,.15);display:flex;align-items:center;justify-content:center;font-size:28px;font-weight:800;color:#1D9E75;margin:0 auto 16px}
+.status-box{background:#161820;border:0.5px solid #2A2D38;border-radius:12px;padding:16px;margin-bottom:20px;text-align:left}
+</style>
+</head>
+<body>
+<div class="lang-bar">
+  <button class="lang-btn active" onclick="setLang('pt',this)">🇧🇷 Português</button>
+  <button class="lang-btn" onclick="setLang('en',this)">🇺🇸 English</button>
+  <button class="lang-btn" onclick="setLang('es',this)">🇪🇸 Español</button>
+  <button class="lang-btn" onclick="setLang('fr',this)">🇫🇷 Français</button>
+  <button class="lang-btn" onclick="setLang('de',this)">🇩🇪 Deutsch</button>
+  <button class="lang-btn" onclick="setLang('it',this)">🇮🇹 Italiano</button>
+  <button class="lang-btn" onclick="setLang('zh',this)">🇨🇳 中文</button>
+  <button class="lang-btn" onclick="setLang('ja',this)">🇯🇵 日本語</button>
+</div>
+<div class="card">
+  <div class="logo">
+    <div class="logo-icon">🔒</div>
+    <div class="logo-name">VaultChat</div>
+  </div>
+  <div id="authArea">
+    <div class="tabs">
+      <div class="tab active" id="tabLogin" onclick="switchTab('login',this)">Entrar</div>
+      <div class="tab" id="tabRegister" onclick="switchTab('register',this)">Criar conta</div>
+    </div>
+    <div id="loginForm">
+      <div class="field"><label id="lEmail">E-MAIL</label><input type="email" id="loginEmail" placeholder="seu@email.com"/></div>
+      <div class="field"><label id="lSenha">SENHA</label><input type="password" id="loginPassword" placeholder="Sua senha"/></div>
+      <button class="btn" onclick="login()" id="loginBtn">Entrar</button>
+      <button class="link-btn" onclick="showForgot()" id="forgotLink">Esqueci minha senha</button>
+    </div>
+    <div id="registerForm" style="display:none">
+      <div class="field"><label id="rNome">NOME</label><input type="text" id="regName" placeholder="Seu nome"/></div>
+      <div class="field"><label>E-MAIL</label><input type="email" id="regEmail" placeholder="seu@email.com"/></div>
+      <div class="field"><label id="rSenha">SENHA</label><input type="password" id="regPassword" placeholder="Mínimo 6 caracteres"/></div>
+      <button class="btn" onclick="register()" id="registerBtn">Criar conta</button>
+    </div>
+    <div id="forgotForm" style="display:none">
+      <p id="forgotDesc" style="font-size:14px;color:#7A7D8A;margin-bottom:16px;text-align:center">Digite seu e-mail e enviaremos um link para redefinir sua senha.</p>
+      <div class="field"><label>E-MAIL</label><input type="email" id="forgotEmail" placeholder="seu@email.com"/></div>
+      <div class="field" id="newPassField" style="display:none"><label id="lNewPass">NOVA SENHA</label><input type="password" id="newPassword" placeholder="Nova senha"/></div>
+      <button class="btn" onclick="forgotPassword()" id="forgotBtn">Enviar link</button>
+      <button class="link-btn" onclick="showLogin()" id="backLogin">Voltar para o login</button>
+    </div>
+    <div class="msg" id="msg"></div>
+    <div class="enc"><div class="enc-dot"></div><span id="encTxt">AES-256 · Criptografia ponta a ponta</span></div>
+  </div>
+  <div class="dashboard" id="dashboard">
+    <div class="user-avatar" id="userInitial">?</div>
+    <h2 id="userName" style="margin-bottom:8px"></h2>
+    <p id="userEmail" style="color:#7A7D8A;font-size:14px;margin-bottom:20px"></p>
+    <div class="status-box">
+      <div style="font-size:12px;color:#7A7D8A;margin-bottom:8px;font-family:monospace;letter-spacing:.5px">STATUS</div>
+      <div style="display:flex;align-items:center;gap:8px;font-size:13px;color:#9FE1CB">
+        <div class="enc-dot"></div>
+        <span id="statusTxt">Conectado · Login funcionando!</span>
+      </div>
+    </div>
+    <button class="btn" style="background:transparent;border:0.5px solid #2A2D38;color:#7A7D8A" onclick="logout()" id="logoutBtn">Sair</button>
+  </div>
+</div>
+<script>
+const T={
+  pt:{login:'Entrar',register:'Criar conta',email:'E-MAIL',password:'SENHA',name:'NOME',loginBtn:'Entrar',registerBtn:'Criar conta',forgot:'Esqueci minha senha',forgotDesc:'Digite seu e-mail e enviaremos um link para redefinir sua senha.',sendLink:'Enviar link',backLogin:'Voltar para o login',newPass:'NOVA SENHA',resetBtn:'Redefinir senha',enc:'AES-256 · Criptografia ponta a ponta',status:'Conectado · Login funcionando!',logout:'Sair',fillAll:'Preencha todos os campos',minPass:'Senha: mínimo 6 caracteres',emailUsed:'Email já cadastrado',wrongPass:'Email ou senha incorretos',emailNotFound:'Email não encontrado',resetOk:'Senha redefinida! Faça login.',emailPlaceholder:'seu@email.com',passPlaceholder:'Sua senha',namePlaceholder:'Seu nome',minPlaceholder:'Mínimo 6 caracteres',newPlaceholder:'Nova senha'},
+  en:{login:'Sign In',register:'Sign Up',email:'EMAIL',password:'PASSWORD',name:'NAME',loginBtn:'Sign In',registerBtn:'Create Account',forgot:'Forgot my password',forgotDesc:'Enter your email and we will send a reset link.',sendLink:'Send link',backLogin:'Back to login',newPass:'NEW PASSWORD',resetBtn:'Reset password',enc:'AES-256 · End-to-end encryption',status:'Connected · Login working!',logout:'Sign Out',fillAll:'Please fill all fields',minPass:'Password: minimum 6 characters',emailUsed:'Email already registered',wrongPass:'Wrong email or password',emailNotFound:'Email not found',resetOk:'Password reset! Please login.',emailPlaceholder:'your@email.com',passPlaceholder:'Your password',namePlaceholder:'Your name',minPlaceholder:'At least 6 characters',newPlaceholder:'New password'},
+  es:{login:'Entrar',register:'Registrarse',email:'CORREO',password:'CONTRASEÑA',name:'NOMBRE',loginBtn:'Entrar',registerBtn:'Crear cuenta',forgot:'Olvidé mi contraseña',forgotDesc:'Ingresa tu correo y te enviaremos un enlace.',sendLink:'Enviar enlace',backLogin:'Volver al inicio',newPass:'NUEVA CONTRASEÑA',resetBtn:'Restablecer',enc:'AES-256 · Cifrado de extremo a extremo',status:'Conectado · ¡Login funcionando!',logout:'Salir',fillAll:'Completa todos los campos',minPass:'Contraseña: mínimo 6 caracteres',emailUsed:'Email ya registrado',wrongPass:'Email o contraseña incorrectos',emailNotFound:'Email no encontrado',resetOk:'Contraseña restablecida.',emailPlaceholder:'tu@email.com',passPlaceholder:'Tu contraseña',namePlaceholder:'Tu nombre',minPlaceholder:'Mínimo 6 caracteres',newPlaceholder:'Nueva contraseña'},
+  fr:{login:'Connexion',register:"S'inscrire",email:'E-MAIL',password:'MOT DE PASSE',name:'NOM',loginBtn:'Se connecter',registerBtn:'Créer un compte',forgot:'Mot de passe oublié',forgotDesc:'Entrez votre e-mail et nous vous enverrons un lien.',sendLink:'Envoyer le lien',backLogin:'Retour à la connexion',newPass:'NOUVEAU MOT DE PASSE',resetBtn:'Réinitialiser',enc:'AES-256 · Chiffrement de bout en bout',status:'Connecté · Login fonctionnel!',logout:'Déconnexion',fillAll:'Remplissez tous les champs',minPass:'Mot de passe: 6 caractères minimum',emailUsed:'Email déjà enregistré',wrongPass:'Email ou mot de passe incorrect',emailNotFound:'Email introuvable',resetOk:'Mot de passe réinitialisé.',emailPlaceholder:'votre@email.com',passPlaceholder:'Votre mot de passe',namePlaceholder:'Votre nom',minPlaceholder:'Au moins 6 caractères',newPlaceholder:'Nouveau mot de passe'},
+  de:{login:'Anmelden',register:'Registrieren',email:'E-MAIL',password:'PASSWORT',name:'NAME',loginBtn:'Anmelden',registerBtn:'Konto erstellen',forgot:'Passwort vergessen',forgotDesc:'Geben Sie Ihre E-Mail ein und wir senden Ihnen einen Link.',sendLink:'Link senden',backLogin:'Zurück zur Anmeldung',newPass:'NEUES PASSWORT',resetBtn:'Zurücksetzen',enc:'AES-256 · Ende-zu-Ende-Verschlüsselung',status:'Verbunden · Login funktioniert!',logout:'Abmelden',fillAll:'Bitte alle Felder ausfüllen',minPass:'Passwort: mindestens 6 Zeichen',emailUsed:'E-Mail bereits registriert',wrongPass:'E-Mail oder Passwort falsch',emailNotFound:'E-Mail nicht gefunden',resetOk:'Passwort zurückgesetzt.',emailPlaceholder:'ihre@email.de',passPlaceholder:'Ihr Passwort',namePlaceholder:'Ihr Name',minPlaceholder:'Mindestens 6 Zeichen',newPlaceholder:'Neues Passwort'},
+  it:{login:'Accedi',register:'Registrati',email:'EMAIL',password:'PASSWORD',name:'NOME',loginBtn:'Accedi',registerBtn:'Crea account',forgot:'Ho dimenticato la password',forgotDesc:'Inserisci la tua email e ti invieremo un link.',sendLink:'Invia link',backLogin:'Torna al login',newPass:'NUOVA PASSWORD',resetBtn:'Reimposta',enc:'AES-256 · Crittografia end-to-end',status:'Connesso · Login funzionante!',logout:'Esci',fillAll:'Compila tutti i campi',minPass:'Password: minimo 6 caratteri',emailUsed:'Email già registrata',wrongPass:'Email o password errati',emailNotFound:'Email non trovata',resetOk:'Password reimpostata.',emailPlaceholder:'tua@email.com',passPlaceholder:'La tua password',namePlaceholder:'Il tuo nome',minPlaceholder:'Almeno 6 caratteri',newPlaceholder:'Nuova password'},
+  zh:{login:'登录',register:'注册',email:'邮箱',password:'密码',name:'姓名',loginBtn:'登录',registerBtn:'创建账户',forgot:'忘记密码',forgotDesc:'输入您的邮箱，我们将发送重置链接。',sendLink:'发送链接',backLogin:'返回登录',newPass:'新密码',resetBtn:'重置密码',enc:'AES-256 · 端对端加密',status:'已连接 · 登录正常!',logout:'退出',fillAll:'请填写所有字段',minPass:'密码至少6个字符',emailUsed:'邮箱已注册',wrongPass:'邮箱或密码错误',emailNotFound:'邮箱未找到',resetOk:'密码已重置。',emailPlaceholder:'你的@邮箱.com',passPlaceholder:'你的密码',namePlaceholder:'你的名字',minPlaceholder:'至少6个字符',newPlaceholder:'新密码'},
+  ja:{login:'ログイン',register:'登録',email:'メール',password:'パスワード',name:'名前',loginBtn:'ログイン',registerBtn:'アカウント作成',forgot:'パスワードを忘れた',forgotDesc:'メールを入力してください。リセットリンクをお送りします。',sendLink:'リンクを送る',backLogin:'ログインに戻る',newPass:'新しいパスワード',resetBtn:'リセット',enc:'AES-256 · エンドツーエンド暗号化',status:'接続済み · ログイン動作中!',logout:'ログアウト',fillAll:'全フィールドを入力してください',minPass:'パスワード: 6文字以上',emailUsed:'メールは既に登録済みです',wrongPass:'メールまたはパスワードが違います',emailNotFound:'メールが見つかりません',resetOk:'パスワードをリセットしました。',emailPlaceholder:'メール@example.com',passPlaceholder:'パスワード',namePlaceholder:'お名前',minPlaceholder:'6文字以上',newPlaceholder:'新しいパスワード'}
+};
+
+let lang='pt';
+const USERS=JSON.parse(localStorage.getItem('vc_users')||'{}');
+function saveUsers(){localStorage.setItem('vc_users',JSON.stringify(USERS));}
+
+function setLang(l,btn){
+  lang=l;
+  document.querySelectorAll('.lang-btn').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');
+  const t=T[l];
+  document.getElementById('tabLogin').textContent=t.login;
+  document.getElementById('tabRegister').textContent=t.register;
+  document.getElementById('lEmail').textContent=t.email;
+  document.getElementById('lSenha').textContent=t.password;
+  document.getElementById('rNome').textContent=t.name;
+  document.getElementById('rSenha').textContent=t.password;
+  document.getElementById('loginBtn').textContent=t.loginBtn;
+  document.getElementById('registerBtn').textContent=t.registerBtn;
+  document.getElementById('forgotLink').textContent=t.forgot;
+  document.getElementById('forgotDesc').textContent=t.forgotDesc;
+  document.getElementById('forgotBtn').textContent=document.getElementById('newPassField').style.display==='none'?t.sendLink:t.resetBtn;
+  document.getElementById('backLogin').textContent=t.backLogin;
+  document.getElementById('lNewPass').textContent=t.newPass;
+  document.getElementById('encTxt').textContent=t.enc;
+  document.getElementById('statusTxt').textContent=t.status;
+  document.getElementById('logoutBtn').textContent=t.logout;
+  document.getElementById('loginEmail').placeholder=t.emailPlaceholder;
+  document.getElementById('loginPassword').placeholder=t.passPlaceholder;
+  document.getElementById('regName').placeholder=t.namePlaceholder;
+  document.getElementById('regEmail').placeholder=t.emailPlaceholder;
+  document.getElementById('regPassword').placeholder=t.minPlaceholder;
+  document.getElementById('newPassword').placeholder=t.newPlaceholder;
+}
+
+function switchTab(tab,el){
+  document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
+  el.classList.add('active');
+  document.getElementById('loginForm').style.display=tab==='login'?'block':'none';
+  document.getElementById('registerForm').style.display=tab==='register'?'block':'none';
+  document.getElementById('forgotForm').style.display='none';
+  hideMsg();
+}
+
+function showForgot(){
+  document.getElementById('loginForm').style.display='none';
+  document.getElementById('forgotForm').style.display='block';
+  document.getElementById('newPassField').style.display='none';
+  document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
+  hideMsg();
+}
+
+function showLogin(){
+  document.getElementById('loginForm').style.display='block';
+  document.getElementById('forgotForm').style.display='none';
+  document.getElementById('tabLogin').classList.add('active');
+  hideMsg();
+}
+
+function showMsg(text,type){
+  const el=document.getElementById('msg');
+  el.textContent=text;el.className='msg '+type;el.style.display='block';
+}
+function hideMsg(){document.getElementById('msg').style.display='none';}
+
+function login(){
+  const email=document.getElementById('loginEmail').value.trim();
+  const password=document.getElementById('loginPassword').value;
+  if(!email||!password)return showMsg(T[lang].fillAll,'error');
+  const user=USERS[email];
+  if(!user||user.password!==btoa(password))return showMsg(T[lang].wrongPass,'error');
+  localStorage.setItem('vc_token','logged');
+  localStorage.setItem('vc_user',JSON.stringify(user));
+  showDashboard(user);
+}
+
+function register(){
+  const name=document.getElementById('regName').value.trim();
+  const email=document.getElementById('regEmail').value.trim();
+  const password=document.getElementById('regPassword').value;
+  if(!name||!email||!password)return showMsg(T[lang].fillAll,'error');
+  if(password.length<6)return showMsg(T[lang].minPass,'error');
+  if(USERS[email])return showMsg(T[lang].emailUsed,'error');
+  const user={name,email,password:btoa(password)};
+  USERS[email]=user;saveUsers();
+  localStorage.setItem('vc_token','logged');
+  localStorage.setItem('vc_user',JSON.stringify(user));
+  showDashboard(user);
+}
+
+function forgotPassword(){
+  const email=document.getElementById('forgotEmail').value.trim();
+  const newPassField=document.getElementById('newPassField');
+  if(!email)return showMsg(T[lang].fillAll,'error');
+  if(newPassField.style.display==='none'){
+    if(!USERS[email])return showMsg(T[lang].emailNotFound,'error');
+    newPassField.style.display='block';
+    document.getElementById('forgotBtn').textContent=T[lang].resetBtn;
+    showMsg('Email encontrado! Digite sua nova senha abaixo.','success');
+  } else {
+    const newPass=document.getElementById('newPassword').value;
+    if(!newPass||newPass.length<6)return showMsg(T[lang].minPass,'error');
+    USERS[email].password=btoa(newPass);
+    saveUsers();
+    showMsg(T[lang].resetOk,'success');
+    setTimeout(()=>{showLogin();newPassField.style.display='none';},2000);
+  }
+}
+
+function showDashboard(user){
+  document.getElementById('authArea').style.display='none';
+  document.getElementById('dashboard').style.display='block';
+  document.getElementById('userName').textContent=user.name;
+  document.getElementById('userEmail').textContent=user.email;
+  document.getElementById('userInitial').textContent=user.name.charAt(0).toUpperCase();
+}
+
+function logout(){
+  localStorage.removeItem('vc_token');
+  localStorage.removeItem('vc_user');
+  document.getElementById('authArea').style.display='block';
+  document.getElementById('dashboard').style.display='none';
+  showLogin();
+}
+
+const savedUser=localStorage.getItem('vc_user');
+if(savedUser)showDashboard(JSON.parse(savedUser));
+</script>
+</body>
+</html>

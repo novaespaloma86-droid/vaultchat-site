@@ -1,0 +1,279 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>VaultChat — Login</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&display=swap" rel="stylesheet"/>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{background:#0A0B0D;color:#F0EEE8;font-family:'Syne',sans-serif;min-height:100vh;display:flex;align-items:center;justify-content:center;padding:20px;flex-direction:column;gap:16px}
+.lang-bar{display:flex;gap:8px;flex-wrap:wrap;justify-content:center}
+.lang-btn{background:#0F1114;border:0.5px solid #2A2D38;border-radius:20px;padding:6px 14px;font-size:12px;color:#7A7D8A;cursor:pointer;font-family:'Syne',sans-serif;transition:all .2s}
+.lang-btn.active{background:#1D9E75;border-color:#1D9E75;color:#fff;font-weight:700}
+.lang-btn:hover{border-color:#1D9E75;color:#F0EEE8}
+.card{background:#0F1114;border:0.5px solid #2A2D38;border-radius:18px;padding:36px;width:100%;max-width:400px}
+.logo{display:flex;align-items:center;gap:10px;justify-content:center;margin-bottom:32px}
+.logo-icon{width:40px;height:40px;background:#1D9E75;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:20px}
+.logo-name{font-size:22px;font-weight:800;letter-spacing:-0.5px}
+.tabs{display:flex;background:#161820;border-radius:10px;padding:4px;margin-bottom:24px}
+.tab{flex:1;padding:9px;text-align:center;border-radius:7px;cursor:pointer;font-size:14px;color:#7A7D8A;font-weight:500;transition:all .2s}
+.tab.active{background:#1A1D24;color:#F0EEE8;font-weight:700}
+.field{margin-bottom:14px}
+.field label{display:block;font-size:12px;color:#7A7D8A;margin-bottom:6px;font-weight:600;letter-spacing:.5px;text-transform:uppercase}
+.field input{width:100%;background:#161820;border:0.5px solid #2A2D38;border-radius:10px;padding:13px 14px;color:#F0EEE8;font-size:15px;font-family:'Syne',sans-serif;outline:none;transition:border .2s}
+.field input:focus{border-color:#1D9E75}
+.btn{width:100%;padding:14px;background:#1D9E75;border:none;border-radius:12px;color:#fff;font-size:16px;font-family:'Syne',sans-serif;font-weight:800;cursor:pointer;margin-top:8px;transition:opacity .2s}
+.btn:hover{opacity:.85}
+.btn:disabled{opacity:.5;cursor:not-allowed}
+.link-btn{background:none;border:none;color:#1D9E75;font-size:13px;font-family:'Syne',sans-serif;cursor:pointer;text-decoration:underline;margin-top:12px;display:block;text-align:center;width:100%}
+.msg{padding:12px;border-radius:8px;font-size:13px;margin-top:12px;text-align:center;display:none}
+.msg.error{background:rgba(216,90,48,.15);border:0.5px solid #D85A30;color:#D85A30}
+.msg.success{background:rgba(29,158,117,.15);border:0.5px solid #1D9E75;color:#9FE1CB}
+.enc{display:flex;align-items:center;justify-content:center;gap:6px;margin-top:20px;font-size:11px;color:#7A7D8A;font-family:monospace}
+.enc-dot{width:5px;height:5px;border-radius:50%;background:#1D9E75;animation:pulse 2s infinite}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.3}}
+.dashboard{display:none;text-align:center}
+.user-avatar{width:64px;height:64px;border-radius:50%;background:rgba(29,158,117,.15);display:flex;align-items:center;justify-content:center;font-size:28px;font-weight:800;color:#1D9E75;margin:0 auto 16px}
+.status-box{background:#161820;border:0.5px solid #2A2D38;border-radius:12px;padding:16px;margin-bottom:20px;text-align:left}
+.btn-logout{background:transparent;border:0.5px solid #2A2D38;color:#7A7D8A;margin-top:0}
+</style>
+</head>
+<body>
+
+<!-- Seletor de idiomas -->
+<div class="lang-bar">
+  <button class="lang-btn active" onclick="setLang('pt')">🇧🇷 Português</button>
+  <button class="lang-btn" onclick="setLang('en')">🇺🇸 English</button>
+  <button class="lang-btn" onclick="setLang('es')">🇪🇸 Español</button>
+  <button class="lang-btn" onclick="setLang('fr')">🇫🇷 Français</button>
+  <button class="lang-btn" onclick="setLang('de')">🇩🇪 Deutsch</button>
+  <button class="lang-btn" onclick="setLang('it')">🇮🇹 Italiano</button>
+  <button class="lang-btn" onclick="setLang('zh')">🇨🇳 中文</button>
+  <button class="lang-btn" onclick="setLang('ja')">🇯🇵 日本語</button>
+</div>
+
+<div class="card">
+  <div class="logo">
+    <div class="logo-icon">🔒</div>
+    <div class="logo-name">VaultChat</div>
+  </div>
+
+  <div id="authArea">
+    <div class="tabs">
+      <div class="tab active" id="tabLogin" onclick="switchTab('login',this)" data-pt="Entrar" data-en="Sign In" data-es="Entrar" data-fr="Connexion" data-de="Anmelden" data-it="Accedi" data-zh="登录" data-ja="ログイン">Entrar</div>
+      <div class="tab" id="tabRegister" onclick="switchTab('register',this)" data-pt="Criar conta" data-en="Sign Up" data-es="Registrarse" data-fr="S'inscrire" data-de="Registrieren" data-it="Registrati" data-zh="注册" data-ja="登録">Criar conta</div>
+    </div>
+
+    <!-- Login -->
+    <div id="loginForm">
+      <div class="field">
+        <label id="lEmail" data-pt="E-MAIL" data-en="EMAIL" data-es="CORREO" data-fr="E-MAIL" data-de="E-MAIL" data-it="EMAIL" data-zh="邮箱" data-ja="メール">E-MAIL</label>
+        <input type="email" id="loginEmail" data-pt="seu@email.com" data-en="your@email.com" data-es="tu@email.com" data-fr="votre@email.com" data-de="ihre@email.de" data-it="tua@email.com" data-zh="你的@邮箱.com" data-ja="メール@example.com" placeholder="seu@email.com"/>
+      </div>
+      <div class="field">
+        <label id="lSenha" data-pt="SENHA" data-en="PASSWORD" data-es="CONTRASEÑA" data-fr="MOT DE PASSE" data-de="PASSWORT" data-it="PASSWORD" data-zh="密码" data-ja="パスワード">SENHA</label>
+        <input type="password" id="loginPassword" data-pt="Sua senha" data-en="Your password" data-es="Tu contraseña" data-fr="Votre mot de passe" data-de="Ihr Passwort" data-it="La tua password" data-zh="你的密码" data-ja="パスワード" placeholder="Sua senha"/>
+      </div>
+      <button class="btn" onclick="login()" id="loginBtn" data-pt="Entrar" data-en="Sign In" data-es="Entrar" data-fr="Se connecter" data-de="Anmelden" data-it="Accedi" data-zh="登录" data-ja="ログイン">Entrar</button>
+      <button class="link-btn" onclick="showForgot()" id="forgotLink" data-pt="Esqueci minha senha" data-en="Forgot my password" data-es="Olvidé mi contraseña" data-fr="Mot de passe oublié" data-de="Passwort vergessen" data-it="Ho dimenticato la password" data-zh="忘记密码" data-ja="パスワードを忘れた">Esqueci minha senha</button>
+    </div>
+
+    <!-- Registro -->
+    <div id="registerForm" style="display:none">
+      <div class="field">
+        <label id="rNome" data-pt="NOME" data-en="NAME" data-es="NOMBRE" data-fr="NOM" data-de="NAME" data-it="NOME" data-zh="姓名" data-ja="名前">NOME</label>
+        <input type="text" id="regName" data-pt="Seu nome" data-en="Your name" data-es="Tu nombre" data-fr="Votre nom" data-de="Ihr Name" data-it="Il tuo nome" data-zh="你的名字" data-ja="お名前" placeholder="Seu nome"/>
+      </div>
+      <div class="field">
+        <label>E-MAIL</label>
+        <input type="email" id="regEmail" placeholder="seu@email.com"/>
+      </div>
+      <div class="field">
+        <label id="rSenha" data-pt="SENHA" data-en="PASSWORD" data-es="CONTRASEÑA" data-fr="MOT DE PASSE" data-de="PASSWORT" data-it="PASSWORD" data-zh="密码" data-ja="パスワード">SENHA</label>
+        <input type="password" id="regPassword" data-pt="Mínimo 6 caracteres" data-en="At least 6 characters" data-es="Mínimo 6 caracteres" data-fr="Au moins 6 caractères" data-de="Mindestens 6 Zeichen" data-it="Almeno 6 caratteri" data-zh="至少6个字符" data-ja="6文字以上" placeholder="Mínimo 6 caracteres"/>
+      </div>
+      <button class="btn" onclick="register()" id="registerBtn" data-pt="Criar conta" data-en="Create Account" data-es="Crear cuenta" data-fr="Créer un compte" data-de="Konto erstellen" data-it="Crea account" data-zh="创建账户" data-ja="アカウント作成">Criar conta</button>
+    </div>
+
+    <!-- Esqueci a senha -->
+    <div id="forgotForm" style="display:none">
+      <p id="forgotDesc" style="font-size:14px;color:#7A7D8A;margin-bottom:16px;text-align:center"
+         data-pt="Digite seu e-mail e enviaremos um link para redefinir sua senha."
+         data-en="Enter your email and we will send a reset link."
+         data-es="Ingresa tu correo y te enviaremos un enlace para restablecer tu contraseña."
+         data-fr="Entrez votre e-mail et nous vous enverrons un lien de réinitialisation."
+         data-de="Geben Sie Ihre E-Mail ein und wir senden Ihnen einen Link zum Zurücksetzen."
+         data-it="Inserisci la tua email e ti invieremo un link per reimpostare la password."
+         data-zh="输入您的邮箱，我们将发送重置链接。"
+         data-ja="メールアドレスを入力してください。リセットリンクをお送りします。">
+        Digite seu e-mail e enviaremos um link para redefinir sua senha.
+      </p>
+      <div class="field">
+        <label>E-MAIL</label>
+        <input type="email" id="forgotEmail" placeholder="seu@email.com"/>
+      </div>
+      <button class="btn" onclick="forgotPassword()" id="forgotBtn"
+        data-pt="Enviar link" data-en="Send link" data-es="Enviar enlace" data-fr="Envoyer le lien" data-de="Link senden" data-it="Invia link" data-zh="发送链接" data-ja="リンクを送る">Enviar link</button>
+      <button class="link-btn" onclick="showLogin()" id="backLogin"
+        data-pt="Voltar para o login" data-en="Back to login" data-es="Volver al inicio" data-fr="Retour à la connexion" data-de="Zurück zur Anmeldung" data-it="Torna al login" data-zh="返回登录" data-ja="ログインに戻る">Voltar para o login</button>
+    </div>
+
+    <div class="msg" id="msg"></div>
+    <div class="enc"><div class="enc-dot"></div><span id="encTxt" data-pt="AES-256 · Criptografia ponta a ponta" data-en="AES-256 · End-to-end encryption" data-es="AES-256 · Cifrado de extremo a extremo" data-fr="AES-256 · Chiffrement de bout en bout" data-de="AES-256 · Ende-zu-Ende-Verschlüsselung" data-it="AES-256 · Crittografia end-to-end" data-zh="AES-256 · 端对端加密" data-ja="AES-256 · エンドツーエンド暗号化">AES-256 · Criptografia ponta a ponta</span></div>
+  </div>
+
+  <!-- Dashboard -->
+  <div class="dashboard" id="dashboard">
+    <div class="user-avatar" id="userInitial">?</div>
+    <h2 id="userName" style="margin-bottom:8px"></h2>
+    <p id="userEmail" style="color:#7A7D8A;font-size:14px;margin-bottom:20px"></p>
+    <div class="status-box">
+      <div style="font-size:12px;color:#7A7D8A;margin-bottom:8px;font-family:monospace;letter-spacing:.5px">STATUS</div>
+      <div style="display:flex;align-items:center;gap:8px;font-size:13px;color:#9FE1CB">
+        <div class="enc-dot"></div>
+        <span id="statusTxt" data-pt="Backend conectado · Login funcionando!" data-en="Backend connected · Login working!" data-es="Backend conectado · ¡Login funcionando!" data-fr="Backend connecté · Connexion fonctionnelle!" data-de="Backend verbunden · Login funktioniert!" data-it="Backend connesso · Login funzionante!" data-zh="后端已连接 · 登录正常!" data-ja="バックエンド接続済み · ログイン動作中!">Backend conectado · Login funcionando!</span>
+      </div>
+    </div>
+    <button class="btn btn-logout" onclick="logout()" id="logoutBtn" data-pt="Sair da conta" data-en="Sign Out" data-es="Cerrar sesión" data-fr="Se déconnecter" data-de="Abmelden" data-it="Esci" data-zh="退出账户" data-ja="サインアウト">Sair da conta</button>
+  </div>
+</div>
+
+<script>
+const API = 'https://vaultchat.bitewise.com.br';
+let currentLang = 'pt';
+
+function setLang(lang) {
+  currentLang = lang;
+  document.querySelectorAll('.lang-btn').forEach(b => b.classList.remove('active'));
+  event.target.classList.add('active');
+  document.querySelectorAll('[data-' + lang + ']').forEach(el => {
+    const val = el.getAttribute('data-' + lang);
+    if (el.tagName === 'INPUT') el.placeholder = val;
+    else el.textContent = val;
+  });
+}
+
+function switchTab(tab, el) {
+  document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+  el.classList.add('active');
+  document.getElementById('loginForm').style.display = tab === 'login' ? 'block' : 'none';
+  document.getElementById('registerForm').style.display = tab === 'register' ? 'block' : 'none';
+  document.getElementById('forgotForm').style.display = 'none';
+  hideMsg();
+}
+
+function showForgot() {
+  document.getElementById('loginForm').style.display = 'none';
+  document.getElementById('forgotForm').style.display = 'block';
+  document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+  hideMsg();
+}
+
+function showLogin() {
+  document.getElementById('loginForm').style.display = 'block';
+  document.getElementById('forgotForm').style.display = 'none';
+  document.getElementById('tabLogin').classList.add('active');
+  hideMsg();
+}
+
+function showMsg(text, type) {
+  const el = document.getElementById('msg');
+  el.textContent = text;
+  el.className = 'msg ' + type;
+  el.style.display = 'block';
+}
+
+function hideMsg() { document.getElementById('msg').style.display = 'none'; }
+
+async function login() {
+  const email = document.getElementById('loginEmail').value.trim();
+  const password = document.getElementById('loginPassword').value;
+  if (!email || !password) return showMsg('Preencha todos os campos', 'error');
+  const btn = document.getElementById('loginBtn');
+  btn.disabled = true; btn.textContent = '...';
+  try {
+    const res = await fetch(API + '/api/auth/login', {
+      method: 'POST', headers: {'Content-Type':'application/json'},
+      body: JSON.stringify({ email, password })
+    });
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.error);
+    localStorage.setItem('vc_token', data.token);
+    localStorage.setItem('vc_user', JSON.stringify(data.user));
+    showDashboard(data.user);
+  } catch(e) {
+    showMsg(e.message || 'Erro ao conectar', 'error');
+  } finally {
+    btn.disabled = false;
+    setLang(currentLang);
+  }
+}
+
+async function register() {
+  const name = document.getElementById('regName').value.trim();
+  const email = document.getElementById('regEmail').value.trim();
+  const password = document.getElementById('regPassword').value;
+  if (!name || !email || !password) return showMsg('Preencha todos os campos', 'error');
+  if (password.length < 6) return showMsg('Senha: mínimo 6 caracteres', 'error');
+  const btn = document.getElementById('registerBtn');
+  btn.disabled = true; btn.textContent = '...';
+  try {
+    const res = await fetch(API + '/api/auth/register', {
+      method: 'POST', headers: {'Content-Type':'application/json'},
+      body: JSON.stringify({ name, email, password })
+    });
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.error);
+    localStorage.setItem('vc_token', data.token);
+    localStorage.setItem('vc_user', JSON.stringify(data.user));
+    showDashboard(data.user);
+  } catch(e) {
+    showMsg(e.message || 'Erro ao conectar', 'error');
+  } finally {
+    btn.disabled = false;
+    setLang(currentLang);
+  }
+}
+
+async function forgotPassword() {
+  const email = document.getElementById('forgotEmail').value.trim();
+  if (!email) return showMsg('Digite seu e-mail', 'error');
+  const btn = document.getElementById('forgotBtn');
+  btn.disabled = true; btn.textContent = '...';
+  try {
+    await fetch(API + '/api/auth/forgot-password', {
+      method: 'POST', headers: {'Content-Type':'application/json'},
+      body: JSON.stringify({ email })
+    });
+    showMsg('Link enviado! Verifique seu e-mail.', 'success');
+  } catch(e) {
+    showMsg('Erro ao enviar. Tente novamente.', 'error');
+  } finally {
+    btn.disabled = false;
+    setLang(currentLang);
+  }
+}
+
+function showDashboard(user) {
+  document.getElementById('authArea').style.display = 'none';
+  document.getElementById('dashboard').style.display = 'block';
+  document.getElementById('userName').textContent = user.name;
+  document.getElementById('userEmail').textContent = user.email;
+  document.getElementById('userInitial').textContent = user.name.charAt(0).toUpperCase();
+  setLang(currentLang);
+}
+
+function logout() {
+  localStorage.removeItem('vc_token');
+  localStorage.removeItem('vc_user');
+  document.getElementById('authArea').style.display = 'block';
+  document.getElementById('dashboard').style.display = 'none';
+  showLogin();
+}
+
+const savedUser = localStorage.getItem('vc_user');
+if (savedUser) showDashboard(JSON.parse(savedUser));
+</script>
+</body>
+</html>

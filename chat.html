@@ -26,9 +26,10 @@ body{background:var(--bg);color:var(--text);font-family:'Syne',sans-serif;displa
 .room-chip.active{background:var(--accent);border-color:var(--accent);color:#fff;font-weight:700}
 .add-room{background:none;border:1px dashed var(--border);border-radius:20px;padding:5px 12px;font-size:12px;color:var(--muted);cursor:pointer;font-family:'Syne',sans-serif;white-space:nowrap;flex-shrink:0}
 .messages{flex:1;overflow-y:auto;padding:12px;display:flex;flex-direction:column;gap:8px;-webkit-overflow-scrolling:touch;}
-.msg-bubble{max-width:80%;padding:9px 12px;border-radius:14px;font-size:14px;line-height:1.5;word-break:break-word}
+.msg-bubble{max-width:80%;padding:9px 12px;border-radius:14px;font-size:14px;line-height:1.5;word-break:break-word;transition:opacity .2s}
 .msg-bubble.mine{background:var(--accent);align-self:flex-end;border-bottom-right-radius:4px}
 .msg-bubble.other{background:var(--bg3);border:1px solid var(--border);align-self:flex-start;border-bottom-left-radius:4px}
+.msg-bubble.sending{opacity:0.6}
 .msg-meta{font-size:10px;opacity:.7;margin-top:4px;display:flex;align-items:center;gap:5px;flex-wrap:wrap}
 .ttl-badge{background:rgba(0,0,0,.3);border-radius:10px;padding:2px 5px;font-size:10px}
 .ttl-urgent{background:rgba(216,90,48,.4);color:#ffaa88}
@@ -44,6 +45,7 @@ body{background:var(--bg);color:var(--text);font-family:'Syne',sans-serif;displa
 .msg-input{flex:1;background:var(--bg3);border:1px solid var(--border);border-radius:12px;padding:10px 12px;color:var(--text);font-size:15px;font-family:'Syne',sans-serif;outline:none;resize:none;max-height:80px;line-height:1.4}
 .msg-input:focus{border-color:var(--accent)}
 .send-btn{background:var(--accent);border:none;border-radius:12px;width:42px;height:42px;cursor:pointer;font-size:16px;color:white;flex-shrink:0}
+.send-btn:active{opacity:.7;transform:scale(.95)}
 .modal{position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,.85);display:none;align-items:flex-end;justify-content:center;z-index:1000}
 @media(min-width:600px){.modal{align-items:center}}
 .modal-card{background:var(--bg2);border:1px solid var(--border);border-radius:18px 18px 0 0;padding:24px;width:100%;max-width:480px}
@@ -164,7 +166,7 @@ const SUPABASE_URL='https://exkspbpamuqzzrbpbflx.supabase.co';
 const SUPABASE_KEY='sb_publishable_AqEz3N2R5apg8tGG0rDu5w_2L92h4ya';
 const sb=supabase.createClient(SUPABASE_URL,SUPABASE_KEY);
 const user=JSON.parse(localStorage.getItem('vc_user')||'{"name":"Usuário","email":""}');
-let currentRoom=null,realtimeSub=null;
+let currentRoom=null,realtimeSub=null,localMessages=[];
 
 if(!localStorage.getItem('vc_token'))window.location.href='login.html';
 
@@ -182,12 +184,15 @@ async function loadRooms(){
 
 async function selectRoom(room){
   currentRoom=room.id;
+  localMessages=[];
   document.getElementById('currentRoomName').textContent=room.name;
   document.getElementById('currentRoomTTL').innerHTML='<span class="online-dot"></span>'+ttlLabel(room.ttl)+' · E2E';
   document.getElementById('inputArea').style.display='flex';
   document.getElementById('ttlSelect').value=room.ttl||86400000;
   document.getElementById('emptyState').style.display='none';
-  loadRooms();await loadMessages();subscribeRoom();
+  loadRooms();
+  await loadMessages();
+  subscribeRoom();
 }
 
 async function loadMessages(){
@@ -195,11 +200,60 @@ async function loadMessages(){
   const now=new Date().toISOString();
   await sb.from('messages').delete().eq('room_id',currentRoom).lt('expires_at',now).not('expires_at','is',null);
   const{data}=await sb.from('messages').select('*').eq('room_id',currentRoom).order('sent_at');
-  renderMessages(data||[]);
+  localMessages=data||[];
+  renderMessages(localMessages);
+}
+
+// 🚀 ENVIO OTIMISTA — aparece imediatamente na tela
+async function sendMessage(){
+  if(!currentRoom)return;
+  const input=document.getElementById('msgInput');
+  const text=input.value.trim();
+  if(!text)return;
+
+  const ttl=parseInt(document.getElementById('ttlSelect').value);
+  const expires_at=ttl>0?new Date(Date.now()+ttl).toISOString():null;
+  const tempId='temp_'+Date.now();
+
+  // 1. Mostra na tela IMEDIATAMENTE
+  const tempMsg={
+    id:tempId,
+    room_id:currentRoom,
+    sender:user.name,
+    text,
+    sent_at:new Date().toISOString(),
+    expires_at,
+    _sending:true
+  };
+  localMessages.push(tempMsg);
+  renderMessages(localMessages);
+
+  // Limpa input imediatamente
+  input.value='';
+  input.style.height='auto';
+
+  // 2. Envia para o servidor em background
+  const{data,error}=await sb.from('messages').insert({
+    id:Date.now().toString(),
+    room_id:currentRoom,
+    sender:user.name,
+    text,
+    sent_at:tempMsg.sent_at,
+    expires_at
+  }).select().single();
+
+  // 3. Substitui mensagem temporária pela real
+  const idx=localMessages.findIndex(m=>m.id===tempId);
+  if(idx!==-1){
+    if(data){localMessages[idx]={...data,_sending:false};}
+    else{localMessages.splice(idx,1);} // remove se erro
+    renderMessages(localMessages);
+  }
 }
 
 function renderMessages(msgs){
   const c=document.getElementById('messages');
+  const scrollBottom=c.scrollHeight-c.scrollTop-c.clientHeight<50;
   c.innerHTML='';
   const enc=document.createElement('div');
   enc.className='enc-badge';
@@ -208,12 +262,13 @@ function renderMessages(msgs){
   msgs.forEach(msg=>{
     const isMine=msg.sender===user.name;
     const b=document.createElement('div');
-    b.className='msg-bubble '+(isMine?'mine':'other');
+    b.className='msg-bubble '+(isMine?'mine':'other')+(msg._sending?' sending':'');
     if(!isMine){const s=document.createElement('div');s.className='msg-sender';s.textContent=msg.sender;b.appendChild(s);}
     const t=document.createElement('div');t.textContent=msg.text;b.appendChild(t);
     const meta=document.createElement('div');meta.className='msg-meta';
-    meta.innerHTML='<span>'+new Date(msg.sent_at).toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'})+'</span>';
-    if(msg.expires_at){
+    const time=new Date(msg.sent_at).toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'});
+    meta.innerHTML='<span>'+time+(msg._sending?' · ✓':'')+'</span>';
+    if(msg.expires_at&&!msg._sending){
       const diff=new Date(msg.expires_at)-new Date();
       const badge=document.createElement('span');
       badge.className='ttl-badge'+(diff<3600000?' ttl-urgent':'');
@@ -222,25 +277,31 @@ function renderMessages(msgs){
     }
     b.appendChild(meta);c.appendChild(b);
   });
-  c.scrollTop=c.scrollHeight;
+  if(scrollBottom||msgs[msgs.length-1]?.sender===user.name)
+    c.scrollTop=c.scrollHeight;
 }
 
 function subscribeRoom(){
   if(realtimeSub)realtimeSub.unsubscribe();
   realtimeSub=sb.channel('room-'+currentRoom)
-    .on('postgres_changes',{event:'INSERT',schema:'public',table:'messages',filter:'room_id=eq.'+currentRoom},()=>loadMessages())
-    .on('postgres_changes',{event:'DELETE',schema:'public',table:'messages',filter:'room_id=eq.'+currentRoom},()=>loadMessages())
+    .on('postgres_changes',{event:'INSERT',schema:'public',table:'messages',filter:'room_id=eq.'+currentRoom},(payload)=>{
+      // Só adiciona se não for uma mensagem que já adicionamos otimisticamente
+      const exists=localMessages.some(m=>m.id===payload.new.id||
+        (m._sending&&m.sender===payload.new.sender&&m.text===payload.new.text));
+      if(!exists){
+        localMessages.push(payload.new);
+        renderMessages(localMessages);
+      } else {
+        // Atualiza mensagem temporária com dados reais
+        const idx=localMessages.findIndex(m=>m._sending&&m.sender===payload.new.sender&&m.text===payload.new.text);
+        if(idx!==-1){localMessages[idx]={...payload.new};renderMessages(localMessages);}
+      }
+    })
+    .on('postgres_changes',{event:'DELETE',schema:'public',table:'messages',filter:'room_id=eq.'+currentRoom},(payload)=>{
+      localMessages=localMessages.filter(m=>m.id!==payload.old.id);
+      renderMessages(localMessages);
+    })
     .subscribe();
-}
-
-async function sendMessage(){
-  if(!currentRoom)return;
-  const input=document.getElementById('msgInput');
-  const text=input.value.trim();if(!text)return;
-  const ttl=parseInt(document.getElementById('ttlSelect').value);
-  const expires_at=ttl>0?new Date(Date.now()+ttl).toISOString():null;
-  await sb.from('messages').insert({id:Date.now().toString(),room_id:currentRoom,sender:user.name,text,sent_at:new Date().toISOString(),expires_at});
-  input.value='';input.style.height='auto';
 }
 
 function handleKey(e){if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();sendMessage();}}
@@ -258,7 +319,8 @@ async function createRoom(){
 async function clearRoom(){
   if(!currentRoom)return;
   if(confirm('Apagar todas as mensagens desta sala?')){
-    await sb.from('messages').delete().eq('room_id',currentRoom);loadMessages();
+    await sb.from('messages').delete().eq('room_id',currentRoom);
+    localMessages=[];renderMessages(localMessages);
   }
 }
 

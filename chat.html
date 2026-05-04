@@ -30,6 +30,7 @@ body{background:var(--bg);color:var(--text);font-family:'Syne',sans-serif;displa
 .msg-bubble.mine{background:var(--accent);align-self:flex-end;border-bottom-right-radius:4px}
 .msg-bubble.other{background:var(--bg3);border:1px solid var(--border);align-self:flex-start;border-bottom-left-radius:4px}
 .msg-bubble.sending{opacity:0.6}
+.msg-bubble.alert-msg{background:rgba(216,90,48,.15);border:1px solid var(--danger);align-self:center;text-align:center;font-size:12px;color:var(--danger);max-width:90%}
 .msg-meta{font-size:10px;opacity:.7;margin-top:4px;display:flex;align-items:center;gap:5px;flex-wrap:wrap}
 .ttl-badge{background:rgba(0,0,0,.3);border-radius:10px;padding:2px 5px;font-size:10px}
 .ttl-urgent{background:rgba(216,90,48,.4);color:#ffaa88}
@@ -56,10 +57,24 @@ body{background:var(--bg);color:var(--text);font-family:'Syne',sans-serif;displa
 .field input,.field select{width:100%;background:var(--bg3);border:1px solid var(--border);border-radius:10px;padding:12px 14px;color:var(--text);font-size:15px;font-family:'Syne',sans-serif;outline:none}
 .btn-full{width:100%;padding:13px;background:var(--accent);border:none;border-radius:12px;color:#fff;font-size:15px;font-family:'Syne',sans-serif;font-weight:800;cursor:pointer;margin-top:4px}
 .btn-cancel-modal{width:100%;padding:11px;background:transparent;border:1px solid var(--border);border-radius:12px;color:var(--muted);font-size:14px;font-family:'Syne',sans-serif;cursor:pointer;margin-top:8px}
-.screenshot-overlay{position:fixed;inset:0;background:var(--bg);z-index:99999;display:none;align-items:center;justify-content:center;flex-direction:column;gap:12px}
+
+/* SCREENSHOT OVERLAY */
+.screenshot-overlay{position:fixed;inset:0;background:#0A0B0D;z-index:99999;display:none;align-items:center;justify-content:center;flex-direction:column;gap:16px;padding:32px;text-align:center}
 .screenshot-overlay.show{display:flex}
+.screenshot-overlay .icon{font-size:56px;animation:shake .5s ease}
+@keyframes shake{0%,100%{transform:rotate(0)}25%{transform:rotate(-8deg)}75%{transform:rotate(8deg)}}
+
+/* ALERTA DE SEGURANÇA */
+.security-alert{position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(216,90,48,.95);z-index:99998;display:none;align-items:center;justify-content:center;flex-direction:column;gap:16px;padding:32px;text-align:center}
+.security-alert.show{display:flex}
+.security-alert .icon{font-size:56px}
+.security-alert h2{font-size:22px;font-weight:800;color:white}
+.security-alert p{font-size:14px;color:rgba(255,255,255,.8);line-height:1.6;max-width:300px}
+.security-alert button{margin-top:8px;padding:12px 28px;background:white;color:var(--danger);border:none;border-radius:12px;font-family:'Syne',sans-serif;font-weight:800;font-size:15px;cursor:pointer}
+
 .online-dot{width:7px;height:7px;border-radius:50%;background:var(--accent);display:inline-block;margin-right:4px;animation:pulse 2s infinite}
 .notif-toast{position:fixed;top:16px;left:50%;transform:translateX(-50%);z-index:9999;background:var(--accent);color:white;padding:12px 18px;border-radius:10px;font-family:'Syne',sans-serif;font-size:13px;box-shadow:0 4px 20px rgba(0,0,0,0.4);max-width:90%;animation:slideDown .3s ease;}
+.danger-toast{background:var(--danger)!important}
 @keyframes slideDown{from{opacity:0;transform:translateX(-50%) translateY(-10px)}to{opacity:1;transform:translateX(-50%) translateY(0)}}
 @media(min-width:768px){
   .room-name{max-width:300px}
@@ -71,10 +86,19 @@ body{background:var(--bg);color:var(--text);font-family:'Syne',sans-serif;displa
 </head>
 <body>
 
+<!-- OVERLAY SCREENSHOT (esconde conteúdo) -->
 <div class="screenshot-overlay" id="screenshotOverlay">
-  <div style="font-size:40px">🔒</div>
-  <div style="font-size:16px;font-weight:800">Conteúdo protegido</div>
-  <div style="font-size:13px;color:var(--muted)">Screenshot bloqueado</div>
+  <div class="icon">🔒</div>
+  <div style="font-size:18px;font-weight:800;color:white">Conteúdo protegido</div>
+  <div style="font-size:13px;color:#7A7D8A">Screenshot detectado e bloqueado</div>
+</div>
+
+<!-- ALERTA DE SEGURANÇA (quando OUTRO membro tenta printar) -->
+<div class="security-alert" id="securityAlert">
+  <div class="icon">⚠️</div>
+  <h2>Alerta de Segurança</h2>
+  <p id="securityAlertMsg">Um membro da sala tentou capturar a tela. As mensagens foram ocultadas por segurança.</p>
+  <button onclick="fecharAlerta()">Entendi</button>
 </div>
 
 <div class="header">
@@ -147,28 +171,91 @@ body{background:var(--bg);color:var(--text);font-family:'Syne',sans-serif;displa
 </div>
 
 <script>
-document.addEventListener('keyup',e=>{
-  if(e.key==='PrintScreen'){
-    document.getElementById('screenshotOverlay').classList.add('show');
-    setTimeout(()=>document.getElementById('screenshotOverlay').classList.remove('show'),3000);
-  }
-});
-document.addEventListener('visibilitychange',()=>{
-  if(document.hidden){
-    document.getElementById('screenshotOverlay').classList.add('show');
-    setTimeout(()=>document.getElementById('screenshotOverlay').classList.remove('show'),1500);
-  }
-});
-
-function autoResize(el){el.style.height='auto';el.style.height=Math.min(el.scrollHeight,80)+'px';}
-
 const SUPABASE_URL='https://exkspbpamuqzzrbpbflx.supabase.co';
 const SUPABASE_KEY='sb_publishable_AqEz3N2R5apg8tGG0rDu5w_2L92h4ya';
 const sb=supabase.createClient(SUPABASE_URL,SUPABASE_KEY);
 const user=JSON.parse(localStorage.getItem('vc_user')||'{"name":"Usuário","email":""}');
-let currentRoom=null,realtimeSub=null,localMessages=[];
+let currentRoom=null,realtimeSub=null,localMessages=[],screenshotCooldown=false;
 
 if(!localStorage.getItem('vc_token'))window.location.href='login.html';
+
+// ═══════════════════════════════════════════
+// 🔒 PROTEÇÃO CONTRA SCREENSHOT
+// ═══════════════════════════════════════════
+
+function ocultarMensagens(){
+  document.getElementById('messages').style.filter='blur(20px)';
+  document.getElementById('screenshotOverlay').classList.add('show');
+}
+
+function revelarMensagens(){
+  document.getElementById('messages').style.filter='';
+  document.getElementById('screenshotOverlay').classList.remove('show');
+}
+
+async function detectarScreenshot(fonte){
+  if(screenshotCooldown||!currentRoom)return;
+  screenshotCooldown=true;
+
+  // 1. Oculta imediatamente
+  ocultarMensagens();
+
+  // 2. Avisa todos na sala via Supabase
+  try{
+    await sb.from('messages').insert({
+      id:'alert_'+Date.now(),
+      room_id:currentRoom,
+      sender:'__SISTEMA__',
+      text:'🚨 ALERTA: '+user.name+' tentou capturar a tela desta conversa.',
+      sent_at:new Date().toISOString(),
+      expires_at:new Date(Date.now()+86400000).toISOString(),
+      _alert:true
+    });
+  }catch(e){}
+
+  // 3. Revela após 3 segundos
+  setTimeout(()=>{
+    revelarMensagens();
+    screenshotCooldown=false;
+  },3000);
+}
+
+// Detecta PrintScreen (Windows/Android)
+document.addEventListener('keyup',e=>{
+  if(e.key==='PrintScreen')detectarScreenshot('teclado');
+});
+
+// Detecta quando app vai para background (iOS screenshot)
+let lastVisible=Date.now();
+document.addEventListener('visibilitychange',()=>{
+  if(document.hidden){
+    lastVisible=Date.now();
+    ocultarMensagens();
+  } else {
+    const tempo=Date.now()-lastVisible;
+    // Se ficou oculto muito pouco tempo (< 2s), provável screenshot
+    if(tempo<2000&&tempo>100&&currentRoom){
+      detectarScreenshot('ios');
+    } else {
+      revelarMensagens();
+    }
+  }
+});
+
+// Detecta mudança de tamanho de tela (alguns dispositivos)
+window.addEventListener('resize',()=>{
+  if(document.hidden)detectarScreenshot('resize');
+});
+
+function fecharAlerta(){
+  document.getElementById('securityAlert').classList.remove('show');
+}
+
+// ═══════════════════════════════════════════
+// 💬 CHAT
+// ═══════════════════════════════════════════
+
+function autoResize(el){el.style.height='auto';el.style.height=Math.min(el.scrollHeight,80)+'px';}
 
 async function loadRooms(){
   const{data}=await sb.from('rooms').select('*').order('created_at');
@@ -183,16 +270,13 @@ async function loadRooms(){
 }
 
 async function selectRoom(room){
-  currentRoom=room.id;
-  localMessages=[];
+  currentRoom=room.id;localMessages=[];
   document.getElementById('currentRoomName').textContent=room.name;
   document.getElementById('currentRoomTTL').innerHTML='<span class="online-dot"></span>'+ttlLabel(room.ttl)+' · E2E';
   document.getElementById('inputArea').style.display='flex';
   document.getElementById('ttlSelect').value=room.ttl||86400000;
   document.getElementById('emptyState').style.display='none';
-  loadRooms();
-  await loadMessages();
-  subscribeRoom();
+  loadRooms();await loadMessages();subscribeRoom();
 }
 
 async function loadMessages(){
@@ -204,70 +288,45 @@ async function loadMessages(){
   renderMessages(localMessages);
 }
 
-// 🚀 ENVIO OTIMISTA — aparece imediatamente na tela
 async function sendMessage(){
   if(!currentRoom)return;
   const input=document.getElementById('msgInput');
-  const text=input.value.trim();
-  if(!text)return;
-
+  const text=input.value.trim();if(!text)return;
   const ttl=parseInt(document.getElementById('ttlSelect').value);
   const expires_at=ttl>0?new Date(Date.now()+ttl).toISOString():null;
   const tempId='temp_'+Date.now();
-
-  // 1. Mostra na tela IMEDIATAMENTE
-  const tempMsg={
-    id:tempId,
-    room_id:currentRoom,
-    sender:user.name,
-    text,
-    sent_at:new Date().toISOString(),
-    expires_at,
-    _sending:true
-  };
-  localMessages.push(tempMsg);
-  renderMessages(localMessages);
-
-  // Limpa input imediatamente
-  input.value='';
-  input.style.height='auto';
-
-  // 2. Envia para o servidor em background
-  const{data,error}=await sb.from('messages').insert({
-    id:Date.now().toString(),
-    room_id:currentRoom,
-    sender:user.name,
-    text,
-    sent_at:tempMsg.sent_at,
-    expires_at
-  }).select().single();
-
-  // 3. Substitui mensagem temporária pela real
+  const tempMsg={id:tempId,room_id:currentRoom,sender:user.name,text,sent_at:new Date().toISOString(),expires_at,_sending:true};
+  localMessages.push(tempMsg);renderMessages(localMessages);
+  input.value='';input.style.height='auto';
+  const{data}=await sb.from('messages').insert({id:Date.now().toString(),room_id:currentRoom,sender:user.name,text,sent_at:tempMsg.sent_at,expires_at}).select().single();
   const idx=localMessages.findIndex(m=>m.id===tempId);
-  if(idx!==-1){
-    if(data){localMessages[idx]={...data,_sending:false};}
-    else{localMessages.splice(idx,1);} // remove se erro
-    renderMessages(localMessages);
-  }
+  if(idx!==-1){data?localMessages[idx]={...data}:localMessages.splice(idx,1);renderMessages(localMessages);}
 }
 
 function renderMessages(msgs){
   const c=document.getElementById('messages');
-  const scrollBottom=c.scrollHeight-c.scrollTop-c.clientHeight<50;
+  const atBottom=c.scrollHeight-c.scrollTop-c.clientHeight<50;
   c.innerHTML='';
   const enc=document.createElement('div');
   enc.className='enc-badge';
-  enc.innerHTML='<div class="enc-dot"></div> E2E · Mensagens expiram automaticamente';
+  enc.innerHTML='<div class="enc-dot"></div> E2E · Mensagens expiram automaticamente · Screenshot monitorado';
   c.appendChild(enc);
   msgs.forEach(msg=>{
+    // Mensagem de alerta do sistema
+    if(msg.sender==='__SISTEMA__'){
+      const a=document.createElement('div');
+      a.className='msg-bubble alert-msg';
+      a.textContent=msg.text;
+      c.appendChild(a);
+      return;
+    }
     const isMine=msg.sender===user.name;
     const b=document.createElement('div');
     b.className='msg-bubble '+(isMine?'mine':'other')+(msg._sending?' sending':'');
     if(!isMine){const s=document.createElement('div');s.className='msg-sender';s.textContent=msg.sender;b.appendChild(s);}
     const t=document.createElement('div');t.textContent=msg.text;b.appendChild(t);
     const meta=document.createElement('div');meta.className='msg-meta';
-    const time=new Date(msg.sent_at).toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'});
-    meta.innerHTML='<span>'+time+(msg._sending?' · ✓':'')+'</span>';
+    meta.innerHTML='<span>'+new Date(msg.sent_at).toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'})+(msg._sending?' · ✓':'')+'</span>';
     if(msg.expires_at&&!msg._sending){
       const diff=new Date(msg.expires_at)-new Date();
       const badge=document.createElement('span');
@@ -277,29 +336,30 @@ function renderMessages(msgs){
     }
     b.appendChild(meta);c.appendChild(b);
   });
-  if(scrollBottom||msgs[msgs.length-1]?.sender===user.name)
-    c.scrollTop=c.scrollHeight;
+  if(atBottom||msgs[msgs.length-1]?.sender===user.name)c.scrollTop=c.scrollHeight;
 }
 
 function subscribeRoom(){
   if(realtimeSub)realtimeSub.unsubscribe();
   realtimeSub=sb.channel('room-'+currentRoom)
     .on('postgres_changes',{event:'INSERT',schema:'public',table:'messages',filter:'room_id=eq.'+currentRoom},(payload)=>{
-      // Só adiciona se não for uma mensagem que já adicionamos otimisticamente
-      const exists=localMessages.some(m=>m.id===payload.new.id||
-        (m._sending&&m.sender===payload.new.sender&&m.text===payload.new.text));
-      if(!exists){
-        localMessages.push(payload.new);
-        renderMessages(localMessages);
-      } else {
-        // Atualiza mensagem temporária com dados reais
-        const idx=localMessages.findIndex(m=>m._sending&&m.sender===payload.new.sender&&m.text===payload.new.text);
-        if(idx!==-1){localMessages[idx]={...payload.new};renderMessages(localMessages);}
+      const msg=payload.new;
+      // Alerta de screenshot de outro membro
+      if(msg.sender==='__SISTEMA__'&&!msg.text.includes(user.name)){
+        document.getElementById('securityAlertMsg').textContent=msg.text;
+        document.getElementById('securityAlert').classList.add('show');
+        ocultarMensagens();
+        setTimeout(()=>{revelarMensagens();},4000);
+      }
+      const exists=localMessages.some(m=>m.id===msg.id||(m._sending&&m.sender===msg.sender&&m.text===msg.text));
+      if(!exists){localMessages.push(msg);renderMessages(localMessages);}
+      else{
+        const idx=localMessages.findIndex(m=>m._sending&&m.sender===msg.sender&&m.text===msg.text);
+        if(idx!==-1){localMessages[idx]={...msg};renderMessages(localMessages);}
       }
     })
     .on('postgres_changes',{event:'DELETE',schema:'public',table:'messages',filter:'room_id=eq.'+currentRoom},(payload)=>{
-      localMessages=localMessages.filter(m=>m.id!==payload.old.id);
-      renderMessages(localMessages);
+      localMessages=localMessages.filter(m=>m.id!==payload.old.id);renderMessages(localMessages);
     })
     .subscribe();
 }
@@ -329,19 +389,17 @@ function ttlLabel(ms){
   if(ms<=3600000)return'1h TTL';if(ms<=21600000)return'6h TTL';
   if(ms<=86400000)return'24h TTL';if(ms<=259200000)return'3d TTL';return'7d TTL';
 }
-
 function timeLeft(e){
   const d=new Date(e)-new Date();if(d<=0)return'Expirada';
   const h=Math.floor(d/3600000),m=Math.floor((d%3600000)/60000);
   return h>0?h+'h '+m+'m':m+'m';
 }
-
-function mostrarToast(title,body){
-  const div=document.createElement('div');div.className='notif-toast';
-  div.innerHTML='<strong>🔒 '+(title||'VaultChat')+'</strong><br>'+(body||'Nova mensagem');
+function mostrarToast(title,body,danger=false){
+  const div=document.createElement('div');
+  div.className='notif-toast'+(danger?' danger-toast':'');
+  div.innerHTML='<strong>'+(danger?'⚠️':'🔒 ')+(title||'VaultChat')+'</strong><br>'+(body||'');
   document.body.appendChild(div);setTimeout(()=>div.remove(),4000);
 }
-
 function goLogin(){localStorage.removeItem('vc_token');window.location.href='login.html';}
 setInterval(()=>{if(currentRoom)loadMessages();},60000);
 loadRooms();

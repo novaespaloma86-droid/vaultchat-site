@@ -22,8 +22,12 @@ body{background:var(--bg);color:var(--text);font-family:'Syne',sans-serif;displa
 .btn-danger{border-color:var(--danger);color:var(--danger)}
 .rooms-bar{background:var(--bg2);border-bottom:1px solid var(--border);padding:8px 12px;display:flex;gap:6px;overflow-x:auto;flex-shrink:0;scrollbar-width:none}
 .rooms-bar::-webkit-scrollbar{display:none}
-.room-chip{background:var(--bg3);border:1px solid var(--border);border-radius:20px;padding:5px 12px;font-size:12px;cursor:pointer;white-space:nowrap;transition:all .2s;flex-shrink:0}
+.room-chip{background:var(--bg3);border:1px solid var(--border);border-radius:20px;padding:5px 12px;font-size:12px;cursor:pointer;white-space:nowrap;transition:all .2s;flex-shrink:0;position:relative;display:flex;align-items:center;gap:6px}
 .room-chip.active{background:var(--accent);border-color:var(--accent);color:#fff;font-weight:700}
+.room-chip.expiring{border-color:#D85A30;color:#D85A30}
+.room-ttl-mini{font-size:9px;opacity:.7;font-family:monospace}
+.room-delete{background:none;border:none;color:inherit;cursor:pointer;font-size:12px;opacity:.6;padding:0;line-height:1}
+.room-delete:hover{opacity:1}
 .add-room{background:none;border:1px dashed var(--border);border-radius:20px;padding:5px 12px;font-size:12px;color:var(--muted);cursor:pointer;font-family:'Syne',sans-serif;white-space:nowrap;flex-shrink:0}
 .messages{flex:1;overflow-y:auto;padding:12px;display:flex;flex-direction:column;gap:8px;-webkit-overflow-scrolling:touch;}
 .msg-bubble{max-width:80%;padding:9px 12px;border-radius:14px;font-size:14px;line-height:1.5;word-break:break-word;transition:opacity .2s}
@@ -32,13 +36,11 @@ body{background:var(--bg);color:var(--text);font-family:'Syne',sans-serif;displa
 .msg-bubble.sending{opacity:0.6}
 .msg-bubble.alert-msg{background:rgba(216,90,48,.15);border:1px solid var(--danger);align-self:center;text-align:center;font-size:12px;color:var(--danger);max-width:90%}
 .msg-img{max-width:100%;border-radius:8px;display:block;margin-top:6px;cursor:pointer;max-height:200px;object-fit:cover}
-.msg-img.loading{filter:blur(4px);transform:scale(0.98);transition:all .3s}
-.msg-img.loaded{filter:none;transform:scale(1)}
+.msg-img.loading{filter:blur(4px);transition:all .3s}
+.msg-img.loaded{filter:none}
 .msg-file{display:flex;align-items:center;gap:8px;background:rgba(0,0,0,.2);border-radius:8px;padding:8px 10px;margin-top:6px;cursor:pointer;text-decoration:none;color:inherit}
 .msg-file-icon{font-size:20px;flex-shrink:0}
-.msg-file-info{min-width:0}
 .msg-file-name{font-size:12px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.msg-file-size{font-size:10px;opacity:.7}
 .msg-meta{font-size:10px;opacity:.7;margin-top:4px;display:flex;align-items:center;gap:5px;flex-wrap:wrap}
 .ttl-badge{background:rgba(0,0,0,.3);border-radius:10px;padding:2px 5px;font-size:10px}
 .ttl-urgent{background:rgba(216,90,48,.4);color:#ffaa88}
@@ -58,7 +60,6 @@ body{background:var(--bg);color:var(--text);font-family:'Syne',sans-serif;displa
 .msg-input{flex:1;background:var(--bg3);border:1px solid var(--border);border-radius:12px;padding:10px 12px;color:var(--text);font-size:15px;font-family:'Syne',sans-serif;outline:none;resize:none;max-height:80px;line-height:1.4}
 .msg-input:focus{border-color:var(--accent)}
 .attach-btn{background:var(--bg3);border:1px solid var(--border);border-radius:12px;width:42px;height:42px;cursor:pointer;font-size:18px;color:var(--muted);flex-shrink:0;display:flex;align-items:center;justify-content:center}
-.attach-btn:active{opacity:.7}
 .send-btn{background:var(--accent);border:none;border-radius:12px;width:42px;height:42px;cursor:pointer;font-size:16px;color:white;flex-shrink:0;display:flex;align-items:center;justify-content:center}
 .send-btn:active{opacity:.7;transform:scale(.95)}
 .modal{position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,.85);display:none;align-items:flex-end;justify-content:center;z-index:1000}
@@ -76,7 +77,7 @@ body{background:var(--bg);color:var(--text);font-family:'Syne',sans-serif;displa
 .security-alert{position:fixed;inset:0;background:rgba(216,90,48,.95);z-index:99998;display:none;align-items:center;justify-content:center;flex-direction:column;gap:16px;padding:32px;text-align:center}
 .security-alert.show{display:flex}
 .online-dot{width:7px;height:7px;border-radius:50%;background:var(--accent);display:inline-block;margin-right:4px;animation:pulse 2s infinite}
-.notif-toast{position:fixed;top:16px;left:50%;transform:translateX(-50%);z-index:9999;background:var(--accent);color:white;padding:12px 18px;border-radius:10px;font-family:'Syne',sans-serif;font-size:13px;box-shadow:0 4px 20px rgba(0,0,0,0.4);max-width:90%;animation:slideDown .3s ease;}
+.notif-toast{position:fixed;top:16px;left:50%;transform:translateX(-50%);z-index:9999;background:var(--accent);color:white;padding:12px 18px;border-radius:10px;font-size:13px;box-shadow:0 4px 20px rgba(0,0,0,0.4);max-width:90%;animation:slideDown .3s ease;}
 .danger-toast{background:var(--danger)!important}
 @keyframes slideDown{from{opacity:0;transform:translateX(-50%) translateY(-10px)}to{opacity:1;transform:translateX(-50%) translateY(0)}}
 .img-preview{position:fixed;inset:0;background:rgba(0,0,0,.95);z-index:99997;display:none;align-items:center;justify-content:center}
@@ -141,7 +142,7 @@ body{background:var(--bg);color:var(--text);font-family:'Syne',sans-serif;displa
 
 <div class="input-area" id="inputArea" style="display:none">
   <div class="upload-progress" id="uploadProgress">
-    <span id="uploadLabel">📎 Comprimindo imagem...</span>
+    <span id="uploadLabel">📎 Enviando...</span>
     <div class="progress-bar"><div class="progress-fill" id="progressFill" style="width:0%"></div></div>
   </div>
   <div class="ttl-selector">
@@ -171,13 +172,25 @@ body{background:var(--bg);color:var(--text);font-family:'Syne',sans-serif;displa
       <input type="text" id="roomNameInput" placeholder="Ex: Jurídico, RH, M&A..."/>
     </div>
     <div class="field">
-      <label>TTL padrão</label>
+      <label>TTL das mensagens</label>
       <select id="roomTTLInput">
         <option value="3600000">1 hora</option>
         <option value="21600000">6 horas</option>
         <option value="86400000" selected>24 horas</option>
         <option value="259200000">3 dias</option>
         <option value="604800000">7 dias</option>
+        <option value="0">Nunca</option>
+      </select>
+    </div>
+    <div class="field">
+      <label>⏱ A sala se autodestrói em</label>
+      <select id="roomExpireInput">
+        <option value="3600000">1 hora</option>
+        <option value="21600000">6 horas</option>
+        <option value="86400000" selected>24 horas</option>
+        <option value="259200000">3 dias</option>
+        <option value="604800000">7 dias</option>
+        <option value="2592000000">30 dias</option>
         <option value="0">Nunca</option>
       </select>
     </div>
@@ -213,7 +226,7 @@ document.addEventListener('visibilitychange',()=>{
 function fecharAlerta(){document.getElementById('securityAlert').classList.remove('show');}
 
 // ═══ COMPRESSÃO DE IMAGEM ═══
-function comprimirImagem(file, maxWidth=1200, qualidade=0.75){
+function comprimirImagem(file,maxWidth=1200,qualidade=0.75){
   return new Promise((resolve)=>{
     if(!file.type.startsWith('image/')){resolve(file);return;}
     const reader=new FileReader();
@@ -224,12 +237,8 @@ function comprimirImagem(file, maxWidth=1200, qualidade=0.75){
         let w=img.width,h=img.height;
         if(w>maxWidth){h=Math.round(h*maxWidth/w);w=maxWidth;}
         canvas.width=w;canvas.height=h;
-        const ctx=canvas.getContext('2d');
-        ctx.drawImage(img,0,0,w,h);
-        canvas.toBlob((blob)=>{
-          const compressed=new File([blob],file.name,{type:'image/jpeg',lastModified:Date.now()});
-          resolve(compressed);
-        },'image/jpeg',qualidade);
+        canvas.getContext('2d').drawImage(img,0,0,w,h);
+        canvas.toBlob((blob)=>resolve(new File([blob],file.name,{type:'image/jpeg'})),'image/jpeg',qualidade);
       };
       img.src=e.target.result;
     };
@@ -237,121 +246,118 @@ function comprimirImagem(file, maxWidth=1200, qualidade=0.75){
   });
 }
 
-// ═══ UPLOAD COM PREVIEW INSTANTÂNEO ═══
+// ═══ UPLOAD ═══
 async function uploadArquivo(input){
   const file=input.files[0];if(!file||!currentRoom)return;
-  const maxSize=20*1024*1024;
-  if(file.size>maxSize){alert('Arquivo muito grande! Máximo 20MB.');return;}
-
+  if(file.size>20*1024*1024){alert('Máximo 20MB.');return;}
   const isImage=file.type.startsWith('image/');
   const progress=document.getElementById('uploadProgress');
   const fill=document.getElementById('progressFill');
   const label=document.getElementById('uploadLabel');
   progress.classList.add('show');
 
-  // 1. PREVIEW INSTANTÂNEO — mostra na tela imediatamente
-  let localUrl=null;
   if(isImage){
-    localUrl=URL.createObjectURL(file);
+    const localUrl=URL.createObjectURL(file);
     const tempId='temp_img_'+Date.now();
     const ttl=parseInt(document.getElementById('ttlSelect').value);
-    const tempMsg={
-      id:tempId,sender:user.name,text:'',
-      file_url:localUrl,file_name:file.name,is_image:true,
-      sent_at:new Date().toISOString(),
-      expires_at:ttl>0?new Date(Date.now()+ttl).toISOString():null,
-      _sending:true,_localUrl:localUrl
-    };
-    localMessages.push(tempMsg);
-    renderMessages(localMessages);
-    label.textContent='📎 Comprimindo imagem...';
-    fill.style.width='20%';
-
-    // 2. Comprime a imagem
+    const tempMsg={id:tempId,sender:user.name,text:'',file_url:localUrl,file_name:file.name,is_image:true,sent_at:new Date().toISOString(),expires_at:ttl>0?new Date(Date.now()+ttl).toISOString():null,_sending:true};
+    localMessages.push(tempMsg);renderMessages(localMessages);
+    label.textContent='📎 Comprimindo...';fill.style.width='20%';
     const compressed=await comprimirImagem(file);
-    const reducao=Math.round((1-compressed.size/file.size)*100);
-    label.textContent='📎 Enviando... (reduzido '+reducao+'%)';
-    fill.style.width='50%';
-
-    // 3. Faz upload
-    const ext='jpg';
-    const path=currentRoom+'/'+Date.now()+'.'+ext;
-    const{data,error}=await sb.storage.from('vaultchat-files').upload(path,compressed);
+    label.textContent='📎 Enviando...';fill.style.width='50%';
+    const path=currentRoom+'/'+Date.now()+'.jpg';
+    const{error}=await sb.storage.from('vaultchat-files').upload(path,compressed);
     fill.style.width='80%';
-    if(error){
-      localMessages=localMessages.filter(m=>m.id!==tempId);
-      renderMessages(localMessages);
-      progress.classList.remove('show');
-      alert('Erro ao enviar imagem.');
-      input.value='';return;
-    }
-
+    if(error){localMessages=localMessages.filter(m=>m.id!==tempId);renderMessages(localMessages);progress.classList.remove('show');alert('Erro ao enviar.');input.value='';return;}
     const{data:urlData}=sb.storage.from('vaultchat-files').getPublicUrl(path);
     fill.style.width='100%';
-
-    // 4. Salva no banco
-    const{data:msgData}=await sb.from('messages').insert({
-      id:Date.now().toString(),room_id:currentRoom,sender:user.name,
-      text:'[IMAGEM]',file_url:urlData.publicUrl,file_name:file.name,
-      file_type:'image/jpeg',is_image:true,
-      sent_at:tempMsg.sent_at,expires_at:tempMsg.expires_at
-    }).select().single();
-
-    // 5. Substitui preview local pela URL real
+    const{data:msgData}=await sb.from('messages').insert({id:Date.now().toString(),room_id:currentRoom,sender:user.name,text:'[IMAGEM]',file_url:urlData.publicUrl,file_name:file.name,file_type:'image/jpeg',is_image:true,sent_at:tempMsg.sent_at,expires_at:tempMsg.expires_at}).select().single();
     const idx=localMessages.findIndex(m=>m.id===tempId);
-    if(idx!==-1&&msgData){
-      URL.revokeObjectURL(localUrl);
-      localMessages[idx]={...msgData};
-      renderMessages(localMessages);
-    }
+    if(idx!==-1&&msgData){URL.revokeObjectURL(localUrl);localMessages[idx]={...msgData};renderMessages(localMessages);}
   } else {
-    // Arquivo não-imagem
-    label.textContent='📎 Enviando arquivo...';
-    fill.style.width='40%';
+    label.textContent='📎 Enviando arquivo...';fill.style.width='40%';
     const ext=file.name.split('.').pop();
     const path=currentRoom+'/'+Date.now()+'.'+ext;
-    const{data,error}=await sb.storage.from('vaultchat-files').upload(path,file);
+    const{error}=await sb.storage.from('vaultchat-files').upload(path,file);
     fill.style.width='80%';
-    if(error){progress.classList.remove('show');alert('Erro ao enviar arquivo.');input.value='';return;}
+    if(error){progress.classList.remove('show');alert('Erro ao enviar.');input.value='';return;}
     const{data:urlData}=sb.storage.from('vaultchat-files').getPublicUrl(path);
     const ttl=parseInt(document.getElementById('ttlSelect').value);
     fill.style.width='100%';
-    await sb.from('messages').insert({
-      id:Date.now().toString(),room_id:currentRoom,sender:user.name,
-      text:'[ARQUIVO:'+file.name+']',file_url:urlData.publicUrl,
-      file_name:file.name,file_type:file.type,is_image:false,
-      sent_at:new Date().toISOString(),
-      expires_at:ttl>0?new Date(Date.now()+ttl).toISOString():null
-    });
+    await sb.from('messages').insert({id:Date.now().toString(),room_id:currentRoom,sender:user.name,text:'[ARQUIVO]',file_url:urlData.publicUrl,file_name:file.name,file_type:file.type,is_image:false,sent_at:new Date().toISOString(),expires_at:ttl>0?new Date(Date.now()+ttl).toISOString():null});
   }
-
   setTimeout(()=>{progress.classList.remove('show');fill.style.width='0%';},500);
   input.value='';
 }
 
-function formatBytes(b){if(b<1024)return b+'B';if(b<1048576)return(b/1024).toFixed(1)+'KB';return(b/1048576).toFixed(1)+'MB';}
 function abrirPreview(url){document.getElementById('imgPreviewSrc').src=url;document.getElementById('imgPreview').classList.add('show');}
 function fecharPreview(){document.getElementById('imgPreview').classList.remove('show');}
-
-// ═══ CHAT ═══
 function autoResize(el){el.style.height='auto';el.style.height=Math.min(el.scrollHeight,80)+'px';}
 
+// ═══ SALAS COM TTL ═══
 async function loadRooms(){
+  const now=new Date().toISOString();
+  // Apaga salas expiradas
+  await sb.from('rooms').delete().lt('expires_at',now).not('expires_at','is',null);
+
   const{data}=await sb.from('rooms').select('*').order('created_at');
   const bar=document.getElementById('roomsBar');
   bar.innerHTML='<button class="add-room" onclick="showNewRoom()">+ Nova sala</button>';
   if(data)data.forEach(r=>{
     const chip=document.createElement('div');
-    chip.className='room-chip'+(currentRoom===r.id?' active':'');
-    chip.textContent=r.name;chip.onclick=()=>selectRoom(r);
+    const expiring=r.expires_at&&new Date(r.expires_at)-new Date()<3600000;
+    chip.className='room-chip'+(currentRoom===r.id?' active':'')+(expiring?' expiring':'');
+
+    const nameSpan=document.createElement('span');
+    nameSpan.textContent=r.name;
+    chip.appendChild(nameSpan);
+
+    // Mini TTL da sala
+    if(r.expires_at){
+      const ttlSpan=document.createElement('span');
+      ttlSpan.className='room-ttl-mini';
+      ttlSpan.textContent='⏱'+timeLeft(r.expires_at);
+      chip.appendChild(ttlSpan);
+    }
+
+    // Botão deletar
+    const delBtn=document.createElement('button');
+    delBtn.className='room-delete';
+    delBtn.textContent='✕';
+    delBtn.onclick=(e)=>{e.stopPropagation();deleteRoom(r.id,r.name);};
+    chip.appendChild(delBtn);
+
+    chip.onclick=(e)=>{if(e.target!==delBtn)selectRoom(r);};
     bar.appendChild(chip);
   });
 }
 
+async function deleteRoom(roomId, roomName){
+  if(!confirm('Apagar a sala "'+roomName+'" e todas as mensagens?'))return;
+  await sb.from('messages').delete().eq('room_id',roomId);
+  await sb.from('rooms').delete().eq('id',roomId);
+  if(currentRoom===roomId){
+    currentRoom=null;
+    document.getElementById('currentRoomName').textContent='VaultChat';
+    document.getElementById('currentRoomTTL').innerHTML='<span class="online-dot"></span>Selecione uma sala';
+    document.getElementById('inputArea').style.display='none';
+    document.getElementById('emptyState').style.display='flex';
+    localMessages=[];
+    renderMessages([]);
+  }
+  loadRooms();
+}
+
 async function selectRoom(room){
+  // Verifica se sala ainda existe
+  if(room.expires_at&&new Date(room.expires_at)<new Date()){
+    await deleteRoom(room.id,room.name);return;
+  }
   currentRoom=room.id;localMessages=[];
   document.getElementById('currentRoomName').textContent=room.name;
-  document.getElementById('currentRoomTTL').innerHTML='<span class="online-dot"></span>'+ttlLabel(room.ttl)+' · E2E';
+  let ttlInfo=ttlLabel(room.ttl)+' · E2E';
+  if(room.expires_at)ttlInfo+=' · Sala expira em '+timeLeft(room.expires_at);
+  document.getElementById('currentRoomTTL').innerHTML='<span class="online-dot"></span>'+ttlInfo;
   document.getElementById('inputArea').style.display='flex';
   document.getElementById('ttlSelect').value=room.ttl||86400000;
   document.getElementById('emptyState').style.display='none';
@@ -387,34 +393,27 @@ function renderMessages(msgs){
   c.innerHTML='';
   const enc=document.createElement('div');
   enc.className='enc-badge';
-  enc.innerHTML='<div class="enc-dot"></div> E2E · Expira automaticamente · Screenshot monitorado';
+  enc.innerHTML='<div class="enc-dot"></div> E2E · Mensagens e salas expiram automaticamente';
   c.appendChild(enc);
   msgs.forEach(msg=>{
     if(msg.sender==='__SISTEMA__'){
-      const a=document.createElement('div');
-      a.className='msg-bubble alert-msg';a.textContent=msg.text;c.appendChild(a);return;
+      const a=document.createElement('div');a.className='msg-bubble alert-msg';a.textContent=msg.text;c.appendChild(a);return;
     }
     const isMine=msg.sender===user.name;
     const b=document.createElement('div');
     b.className='msg-bubble '+(isMine?'mine':'other')+(msg._sending?' sending':'');
     if(!isMine){const s=document.createElement('div');s.className='msg-sender';s.textContent=msg.sender;b.appendChild(s);}
-
     if(msg.is_image&&msg.file_url){
-      const img=document.createElement('img');
-      img.className='msg-img loading';
-      img.src=msg.file_url;
+      const img=document.createElement('img');img.className='msg-img loading';img.src=msg.file_url;
       img.onload=()=>img.classList.replace('loading','loaded');
-      img.onclick=()=>abrirPreview(msg.file_url);
-      b.appendChild(img);
+      img.onclick=()=>abrirPreview(msg.file_url);b.appendChild(img);
     } else if(msg.file_url&&!msg.is_image){
-      const link=document.createElement('a');
-      link.className='msg-file';link.href=msg.file_url;link.target='_blank';
-      link.innerHTML='<div class="msg-file-icon">📄</div><div class="msg-file-info"><div class="msg-file-name">'+(msg.file_name||'Arquivo')+'</div><div class="msg-file-size">Toque para abrir</div></div>';
+      const link=document.createElement('a');link.className='msg-file';link.href=msg.file_url;link.target='_blank';
+      link.innerHTML='<div class="msg-file-icon">📄</div><div><div class="msg-file-name">'+(msg.file_name||'Arquivo')+'</div><div style="font-size:10px;opacity:.7">Toque para abrir</div></div>';
       b.appendChild(link);
-    } else if(msg.text&&msg.text!=='[IMAGEM]'){
+    } else if(msg.text&&msg.text!=='[IMAGEM]'&&msg.text!=='[ARQUIVO]'){
       const t=document.createElement('div');t.textContent=msg.text;b.appendChild(t);
     }
-
     const meta=document.createElement('div');meta.className='msg-meta';
     meta.innerHTML='<span>'+new Date(msg.sent_at).toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'})+(msg._sending?' · ⏳':'')+'</span>';
     if(msg.expires_at&&!msg._sending){
@@ -456,7 +455,9 @@ function closeModal(){document.getElementById('newRoomModal').style.display='non
 async function createRoom(){
   const name=document.getElementById('roomNameInput').value.trim();if(!name)return;
   const ttl=parseInt(document.getElementById('roomTTLInput').value);
-  const{data}=await sb.from('rooms').insert({id:'room_'+Date.now(),name,ttl,created_at:new Date().toISOString()}).select().single();
+  const expire=parseInt(document.getElementById('roomExpireInput').value);
+  const expires_at=expire>0?new Date(Date.now()+expire).toISOString():null;
+  const{data}=await sb.from('rooms').insert({id:'room_'+Date.now(),name,ttl,expires_at,created_at:new Date().toISOString()}).select().single();
   closeModal();document.getElementById('roomNameInput').value='';
   await loadRooms();if(data)selectRoom(data);
 }
@@ -470,10 +471,20 @@ async function clearRoom(){
 }
 
 function ttlLabel(ms){if(!ms||ms==0)return'Nunca';if(ms<=3600000)return'1h TTL';if(ms<=21600000)return'6h TTL';if(ms<=86400000)return'24h TTL';if(ms<=259200000)return'3d TTL';return'7d TTL';}
-function timeLeft(e){const d=new Date(e)-new Date();if(d<=0)return'Expirada';const h=Math.floor(d/3600000),m=Math.floor((d%3600000)/60000);return h>0?h+'h '+m+'m':m+'m';}
+function timeLeft(e){
+  const d=new Date(e)-new Date();if(d<=0)return'Expirada';
+  const dias=Math.floor(d/86400000);
+  const h=Math.floor((d%86400000)/3600000);
+  const m=Math.floor((d%3600000)/60000);
+  if(dias>0)return dias+'d '+h+'h';
+  if(h>0)return h+'h '+m+'m';
+  return m+'m';
+}
 function mostrarToast(title,body,danger=false){const div=document.createElement('div');div.className='notif-toast'+(danger?' danger-toast':'');div.innerHTML='<strong>'+(danger?'⚠️ ':'🔒 ')+(title||'VaultChat')+'</strong><br>'+(body||'');document.body.appendChild(div);setTimeout(()=>div.remove(),4000);}
 function goLogin(){localStorage.removeItem('vc_token');window.location.href='login.html';}
-setInterval(()=>{if(currentRoom)loadMessages();},60000);
+
+// Cleanup a cada minuto
+setInterval(()=>{if(currentRoom)loadMessages();loadRooms();},60000);
 loadRooms();
 </script>
 

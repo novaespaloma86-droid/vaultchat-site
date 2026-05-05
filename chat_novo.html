@@ -31,14 +31,6 @@ body{background:var(--bg);color:var(--text);font-family:'Syne',sans-serif;displa
 .msg-bubble.other{background:var(--bg3);border:1px solid var(--border);align-self:flex-start;border-bottom-left-radius:4px}
 .msg-bubble.sending{opacity:0.6}
 .msg-bubble.alert-msg{background:rgba(216,90,48,.15);border:1px solid var(--danger);align-self:center;text-align:center;font-size:12px;color:var(--danger);max-width:90%}
-.msg-img{max-width:100%;border-radius:8px;display:block;margin-top:6px;cursor:pointer;max-height:200px;object-fit:cover}
-.msg-img.loading{filter:blur(4px);transform:scale(0.98);transition:all .3s}
-.msg-img.loaded{filter:none;transform:scale(1)}
-.msg-file{display:flex;align-items:center;gap:8px;background:rgba(0,0,0,.2);border-radius:8px;padding:8px 10px;margin-top:6px;cursor:pointer;text-decoration:none;color:inherit}
-.msg-file-icon{font-size:20px;flex-shrink:0}
-.msg-file-info{min-width:0}
-.msg-file-name{font-size:12px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.msg-file-size{font-size:10px;opacity:.7}
 .msg-meta{font-size:10px;opacity:.7;margin-top:4px;display:flex;align-items:center;gap:5px;flex-wrap:wrap}
 .ttl-badge{background:rgba(0,0,0,.3);border-radius:10px;padding:2px 5px;font-size:10px}
 .ttl-urgent{background:rgba(216,90,48,.4);color:#ffaa88}
@@ -48,18 +40,12 @@ body{background:var(--bg);color:var(--text);font-family:'Syne',sans-serif;displa
 @keyframes pulse{0%,100%{opacity:1}50%{opacity:.3}}
 .empty-state{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;color:var(--muted);gap:10px;text-align:center;padding:24px}
 .input-area{background:var(--bg2);border-top:1px solid var(--border);padding:10px 12px;display:flex;flex-direction:column;gap:8px;flex-shrink:0}
-.upload-progress{background:var(--bg3);border:1px solid var(--border);border-radius:8px;padding:8px 12px;font-size:12px;color:var(--muted);display:none;align-items:center;gap:8px}
-.upload-progress.show{display:flex}
-.progress-bar{flex:1;height:4px;background:var(--border);border-radius:2px;overflow:hidden}
-.progress-fill{height:100%;background:var(--accent);border-radius:2px;transition:width .3s}
 .ttl-selector{display:flex;align-items:center;gap:6px;font-size:12px;color:var(--muted)}
 .ttl-selector select{background:var(--bg3);border:1px solid var(--border);border-radius:8px;padding:4px 8px;color:var(--text);font-family:'Syne',sans-serif;font-size:12px;outline:none}
-.input-row{display:flex;gap:6px;align-items:flex-end}
+.input-row{display:flex;gap:8px;align-items:flex-end}
 .msg-input{flex:1;background:var(--bg3);border:1px solid var(--border);border-radius:12px;padding:10px 12px;color:var(--text);font-size:15px;font-family:'Syne',sans-serif;outline:none;resize:none;max-height:80px;line-height:1.4}
 .msg-input:focus{border-color:var(--accent)}
-.attach-btn{background:var(--bg3);border:1px solid var(--border);border-radius:12px;width:42px;height:42px;cursor:pointer;font-size:18px;color:var(--muted);flex-shrink:0;display:flex;align-items:center;justify-content:center}
-.attach-btn:active{opacity:.7}
-.send-btn{background:var(--accent);border:none;border-radius:12px;width:42px;height:42px;cursor:pointer;font-size:16px;color:white;flex-shrink:0;display:flex;align-items:center;justify-content:center}
+.send-btn{background:var(--accent);border:none;border-radius:12px;width:42px;height:42px;cursor:pointer;font-size:16px;color:white;flex-shrink:0}
 .send-btn:active{opacity:.7;transform:scale(.95)}
 .modal{position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,.85);display:none;align-items:flex-end;justify-content:center;z-index:1000}
 @media(min-width:600px){.modal{align-items:center}}
@@ -71,18 +57,25 @@ body{background:var(--bg);color:var(--text);font-family:'Syne',sans-serif;displa
 .field input,.field select{width:100%;background:var(--bg3);border:1px solid var(--border);border-radius:10px;padding:12px 14px;color:var(--text);font-size:15px;font-family:'Syne',sans-serif;outline:none}
 .btn-full{width:100%;padding:13px;background:var(--accent);border:none;border-radius:12px;color:#fff;font-size:15px;font-family:'Syne',sans-serif;font-weight:800;cursor:pointer;margin-top:4px}
 .btn-cancel-modal{width:100%;padding:11px;background:transparent;border:1px solid var(--border);border-radius:12px;color:var(--muted);font-size:14px;font-family:'Syne',sans-serif;cursor:pointer;margin-top:8px}
-.screenshot-overlay{position:fixed;inset:0;background:var(--bg);z-index:99999;display:none;align-items:center;justify-content:center;flex-direction:column;gap:12px}
+
+/* SCREENSHOT OVERLAY */
+.screenshot-overlay{position:fixed;inset:0;background:#0A0B0D;z-index:99999;display:none;align-items:center;justify-content:center;flex-direction:column;gap:16px;padding:32px;text-align:center}
 .screenshot-overlay.show{display:flex}
-.security-alert{position:fixed;inset:0;background:rgba(216,90,48,.95);z-index:99998;display:none;align-items:center;justify-content:center;flex-direction:column;gap:16px;padding:32px;text-align:center}
+.screenshot-overlay .icon{font-size:56px;animation:shake .5s ease}
+@keyframes shake{0%,100%{transform:rotate(0)}25%{transform:rotate(-8deg)}75%{transform:rotate(8deg)}}
+
+/* ALERTA DE SEGURANÇA */
+.security-alert{position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(216,90,48,.95);z-index:99998;display:none;align-items:center;justify-content:center;flex-direction:column;gap:16px;padding:32px;text-align:center}
 .security-alert.show{display:flex}
+.security-alert .icon{font-size:56px}
+.security-alert h2{font-size:22px;font-weight:800;color:white}
+.security-alert p{font-size:14px;color:rgba(255,255,255,.8);line-height:1.6;max-width:300px}
+.security-alert button{margin-top:8px;padding:12px 28px;background:white;color:var(--danger);border:none;border-radius:12px;font-family:'Syne',sans-serif;font-weight:800;font-size:15px;cursor:pointer}
+
 .online-dot{width:7px;height:7px;border-radius:50%;background:var(--accent);display:inline-block;margin-right:4px;animation:pulse 2s infinite}
 .notif-toast{position:fixed;top:16px;left:50%;transform:translateX(-50%);z-index:9999;background:var(--accent);color:white;padding:12px 18px;border-radius:10px;font-family:'Syne',sans-serif;font-size:13px;box-shadow:0 4px 20px rgba(0,0,0,0.4);max-width:90%;animation:slideDown .3s ease;}
 .danger-toast{background:var(--danger)!important}
 @keyframes slideDown{from{opacity:0;transform:translateX(-50%) translateY(-10px)}to{opacity:1;transform:translateX(-50%) translateY(0)}}
-.img-preview{position:fixed;inset:0;background:rgba(0,0,0,.95);z-index:99997;display:none;align-items:center;justify-content:center}
-.img-preview.show{display:flex}
-.img-preview img{max-width:95%;max-height:90vh;border-radius:8px;object-fit:contain}
-.img-preview-close{position:absolute;top:16px;right:16px;background:rgba(255,255,255,.2);border:none;color:white;width:36px;height:36px;border-radius:50%;font-size:18px;cursor:pointer}
 @media(min-width:768px){
   .room-name{max-width:300px}
   .msg-bubble{max-width:60%}
@@ -93,22 +86,19 @@ body{background:var(--bg);color:var(--text);font-family:'Syne',sans-serif;displa
 </head>
 <body>
 
+<!-- OVERLAY SCREENSHOT (esconde conteúdo) -->
 <div class="screenshot-overlay" id="screenshotOverlay">
-  <div style="font-size:40px">🔒</div>
-  <div style="font-size:16px;font-weight:800;color:white">Conteúdo protegido</div>
-  <div style="font-size:13px;color:var(--muted)">Screenshot detectado</div>
+  <div class="icon">🔒</div>
+  <div style="font-size:18px;font-weight:800;color:white">Conteúdo protegido</div>
+  <div style="font-size:13px;color:#7A7D8A">Screenshot detectado e bloqueado</div>
 </div>
 
+<!-- ALERTA DE SEGURANÇA (quando OUTRO membro tenta printar) -->
 <div class="security-alert" id="securityAlert">
-  <div style="font-size:48px">⚠️</div>
-  <div style="font-size:20px;font-weight:800;color:white">Alerta de Segurança</div>
-  <div id="securityAlertMsg" style="font-size:14px;color:rgba(255,255,255,.85);line-height:1.6;max-width:300px"></div>
-  <button onclick="fecharAlerta()" style="margin-top:8px;padding:12px 28px;background:white;color:var(--danger);border:none;border-radius:12px;font-family:'Syne',sans-serif;font-weight:800;font-size:15px;cursor:pointer">Entendi</button>
-</div>
-
-<div class="img-preview" id="imgPreview" onclick="fecharPreview()">
-  <button class="img-preview-close">✕</button>
-  <img id="imgPreviewSrc" src="" alt=""/>
+  <div class="icon">⚠️</div>
+  <h2>Alerta de Segurança</h2>
+  <p id="securityAlertMsg">Um membro da sala tentou capturar a tela. As mensagens foram ocultadas por segurança.</p>
+  <button onclick="fecharAlerta()">Entendi</button>
 </div>
 
 <div class="header">
@@ -140,10 +130,6 @@ body{background:var(--bg);color:var(--text);font-family:'Syne',sans-serif;displa
 </div>
 
 <div class="input-area" id="inputArea" style="display:none">
-  <div class="upload-progress" id="uploadProgress">
-    <span id="uploadLabel">📎 Comprimindo imagem...</span>
-    <div class="progress-bar"><div class="progress-fill" id="progressFill" style="width:0%"></div></div>
-  </div>
   <div class="ttl-selector">
     🕐
     <select id="ttlSelect">
@@ -156,8 +142,6 @@ body{background:var(--bg);color:var(--text);font-family:'Syne',sans-serif;displa
     </select>
   </div>
   <div class="input-row">
-    <button class="attach-btn" onclick="document.getElementById('fileInput').click()">📎</button>
-    <input type="file" id="fileInput" style="display:none" accept="image/*,.pdf,.doc,.docx,.txt" onchange="uploadArquivo(this)"/>
     <textarea class="msg-input" id="msgInput" placeholder="Mensagem segura..." rows="1" onkeydown="handleKey(event)" oninput="autoResize(this)"></textarea>
     <button class="send-btn" onclick="sendMessage()">➤</button>
   </div>
@@ -195,145 +179,82 @@ let currentRoom=null,realtimeSub=null,localMessages=[],screenshotCooldown=false;
 
 if(!localStorage.getItem('vc_token'))window.location.href='login.html';
 
-// ═══ SCREENSHOT ═══
-function ocultarMensagens(){document.getElementById('messages').style.filter='blur(20px)';document.getElementById('screenshotOverlay').classList.add('show');}
-function revelarMensagens(){document.getElementById('messages').style.filter='';document.getElementById('screenshotOverlay').classList.remove('show');}
-async function detectarScreenshot(){
-  if(screenshotCooldown||!currentRoom)return;
-  screenshotCooldown=true;ocultarMensagens();
-  try{await sb.from('messages').insert({id:'alert_'+Date.now(),room_id:currentRoom,sender:'__SISTEMA__',text:'🚨 ALERTA: '+user.name+' tentou capturar a tela.',sent_at:new Date().toISOString(),expires_at:new Date(Date.now()+86400000).toISOString()});}catch(e){}
-  setTimeout(()=>{revelarMensagens();screenshotCooldown=false;},3000);
+// ═══════════════════════════════════════════
+// 🔒 PROTEÇÃO CONTRA SCREENSHOT
+// ═══════════════════════════════════════════
+
+function ocultarMensagens(){
+  document.getElementById('messages').style.filter='blur(20px)';
+  document.getElementById('screenshotOverlay').classList.add('show');
 }
-document.addEventListener('keyup',e=>{if(e.key==='PrintScreen')detectarScreenshot();});
+
+function revelarMensagens(){
+  document.getElementById('messages').style.filter='';
+  document.getElementById('screenshotOverlay').classList.remove('show');
+}
+
+async function detectarScreenshot(fonte){
+  if(screenshotCooldown||!currentRoom)return;
+  screenshotCooldown=true;
+
+  // 1. Oculta imediatamente
+  ocultarMensagens();
+
+  // 2. Avisa todos na sala via Supabase
+  try{
+    await sb.from('messages').insert({
+      id:'alert_'+Date.now(),
+      room_id:currentRoom,
+      sender:'__SISTEMA__',
+      text:'🚨 ALERTA: '+user.name+' tentou capturar a tela desta conversa.',
+      sent_at:new Date().toISOString(),
+      expires_at:new Date(Date.now()+86400000).toISOString(),
+      _alert:true
+    });
+  }catch(e){}
+
+  // 3. Revela após 3 segundos
+  setTimeout(()=>{
+    revelarMensagens();
+    screenshotCooldown=false;
+  },3000);
+}
+
+// Detecta PrintScreen (Windows/Android)
+document.addEventListener('keyup',e=>{
+  if(e.key==='PrintScreen')detectarScreenshot('teclado');
+});
+
+// Detecta quando app vai para background (iOS screenshot)
 let lastVisible=Date.now();
 document.addEventListener('visibilitychange',()=>{
-  if(document.hidden){lastVisible=Date.now();ocultarMensagens();}
-  else{const t=Date.now()-lastVisible;if(t<2000&&t>100&&currentRoom)detectarScreenshot();else revelarMensagens();}
-});
-function fecharAlerta(){document.getElementById('securityAlert').classList.remove('show');}
-
-// ═══ COMPRESSÃO DE IMAGEM ═══
-function comprimirImagem(file, maxWidth=1200, qualidade=0.75){
-  return new Promise((resolve)=>{
-    if(!file.type.startsWith('image/')){resolve(file);return;}
-    const reader=new FileReader();
-    reader.onload=(e)=>{
-      const img=new Image();
-      img.onload=()=>{
-        const canvas=document.createElement('canvas');
-        let w=img.width,h=img.height;
-        if(w>maxWidth){h=Math.round(h*maxWidth/w);w=maxWidth;}
-        canvas.width=w;canvas.height=h;
-        const ctx=canvas.getContext('2d');
-        ctx.drawImage(img,0,0,w,h);
-        canvas.toBlob((blob)=>{
-          const compressed=new File([blob],file.name,{type:'image/jpeg',lastModified:Date.now()});
-          resolve(compressed);
-        },'image/jpeg',qualidade);
-      };
-      img.src=e.target.result;
-    };
-    reader.readAsDataURL(file);
-  });
-}
-
-// ═══ UPLOAD COM PREVIEW INSTANTÂNEO ═══
-async function uploadArquivo(input){
-  const file=input.files[0];if(!file||!currentRoom)return;
-  const maxSize=20*1024*1024;
-  if(file.size>maxSize){alert('Arquivo muito grande! Máximo 20MB.');return;}
-
-  const isImage=file.type.startsWith('image/');
-  const progress=document.getElementById('uploadProgress');
-  const fill=document.getElementById('progressFill');
-  const label=document.getElementById('uploadLabel');
-  progress.classList.add('show');
-
-  // 1. PREVIEW INSTANTÂNEO — mostra na tela imediatamente
-  let localUrl=null;
-  if(isImage){
-    localUrl=URL.createObjectURL(file);
-    const tempId='temp_img_'+Date.now();
-    const ttl=parseInt(document.getElementById('ttlSelect').value);
-    const tempMsg={
-      id:tempId,sender:user.name,text:'',
-      file_url:localUrl,file_name:file.name,is_image:true,
-      sent_at:new Date().toISOString(),
-      expires_at:ttl>0?new Date(Date.now()+ttl).toISOString():null,
-      _sending:true,_localUrl:localUrl
-    };
-    localMessages.push(tempMsg);
-    renderMessages(localMessages);
-    label.textContent='📎 Comprimindo imagem...';
-    fill.style.width='20%';
-
-    // 2. Comprime a imagem
-    const compressed=await comprimirImagem(file);
-    const reducao=Math.round((1-compressed.size/file.size)*100);
-    label.textContent='📎 Enviando... (reduzido '+reducao+'%)';
-    fill.style.width='50%';
-
-    // 3. Faz upload
-    const ext='jpg';
-    const path=currentRoom+'/'+Date.now()+'.'+ext;
-    const{data,error}=await sb.storage.from('vaultchat-files').upload(path,compressed);
-    fill.style.width='80%';
-    if(error){
-      localMessages=localMessages.filter(m=>m.id!==tempId);
-      renderMessages(localMessages);
-      progress.classList.remove('show');
-      alert('Erro ao enviar imagem.');
-      input.value='';return;
-    }
-
-    const{data:urlData}=sb.storage.from('vaultchat-files').getPublicUrl(path);
-    fill.style.width='100%';
-
-    // 4. Salva no banco
-    const{data:msgData}=await sb.from('messages').insert({
-      id:Date.now().toString(),room_id:currentRoom,sender:user.name,
-      text:'[IMAGEM]',file_url:urlData.publicUrl,file_name:file.name,
-      file_type:'image/jpeg',is_image:true,
-      sent_at:tempMsg.sent_at,expires_at:tempMsg.expires_at
-    }).select().single();
-
-    // 5. Substitui preview local pela URL real
-    const idx=localMessages.findIndex(m=>m.id===tempId);
-    if(idx!==-1&&msgData){
-      URL.revokeObjectURL(localUrl);
-      localMessages[idx]={...msgData};
-      renderMessages(localMessages);
-    }
+  if(document.hidden){
+    lastVisible=Date.now();
+    ocultarMensagens();
   } else {
-    // Arquivo não-imagem
-    label.textContent='📎 Enviando arquivo...';
-    fill.style.width='40%';
-    const ext=file.name.split('.').pop();
-    const path=currentRoom+'/'+Date.now()+'.'+ext;
-    const{data,error}=await sb.storage.from('vaultchat-files').upload(path,file);
-    fill.style.width='80%';
-    if(error){progress.classList.remove('show');alert('Erro ao enviar arquivo.');input.value='';return;}
-    const{data:urlData}=sb.storage.from('vaultchat-files').getPublicUrl(path);
-    const ttl=parseInt(document.getElementById('ttlSelect').value);
-    fill.style.width='100%';
-    await sb.from('messages').insert({
-      id:Date.now().toString(),room_id:currentRoom,sender:user.name,
-      text:'[ARQUIVO:'+file.name+']',file_url:urlData.publicUrl,
-      file_name:file.name,file_type:file.type,is_image:false,
-      sent_at:new Date().toISOString(),
-      expires_at:ttl>0?new Date(Date.now()+ttl).toISOString():null
-    });
+    const tempo=Date.now()-lastVisible;
+    // Se ficou oculto muito pouco tempo (< 2s), provável screenshot
+    if(tempo<2000&&tempo>100&&currentRoom){
+      detectarScreenshot('ios');
+    } else {
+      revelarMensagens();
+    }
   }
+});
 
-  setTimeout(()=>{progress.classList.remove('show');fill.style.width='0%';},500);
-  input.value='';
+// Detecta mudança de tamanho de tela (alguns dispositivos)
+window.addEventListener('resize',()=>{
+  if(document.hidden)detectarScreenshot('resize');
+});
+
+function fecharAlerta(){
+  document.getElementById('securityAlert').classList.remove('show');
 }
 
-function formatBytes(b){if(b<1024)return b+'B';if(b<1048576)return(b/1024).toFixed(1)+'KB';return(b/1048576).toFixed(1)+'MB';}
-function abrirPreview(url){document.getElementById('imgPreviewSrc').src=url;document.getElementById('imgPreview').classList.add('show');}
-function fecharPreview(){document.getElementById('imgPreview').classList.remove('show');}
+// ═══════════════════════════════════════════
+// 💬 CHAT
+// ═══════════════════════════════════════════
 
-// ═══ CHAT ═══
 function autoResize(el){el.style.height='auto';el.style.height=Math.min(el.scrollHeight,80)+'px';}
 
 async function loadRooms(){
@@ -363,7 +284,8 @@ async function loadMessages(){
   const now=new Date().toISOString();
   await sb.from('messages').delete().eq('room_id',currentRoom).lt('expires_at',now).not('expires_at','is',null);
   const{data}=await sb.from('messages').select('*').eq('room_id',currentRoom).order('sent_at');
-  localMessages=data||[];renderMessages(localMessages);
+  localMessages=data||[];
+  renderMessages(localMessages);
 }
 
 async function sendMessage(){
@@ -387,36 +309,24 @@ function renderMessages(msgs){
   c.innerHTML='';
   const enc=document.createElement('div');
   enc.className='enc-badge';
-  enc.innerHTML='<div class="enc-dot"></div> E2E · Expira automaticamente · Screenshot monitorado';
+  enc.innerHTML='<div class="enc-dot"></div> E2E · Mensagens expiram automaticamente · Screenshot monitorado';
   c.appendChild(enc);
   msgs.forEach(msg=>{
+    // Mensagem de alerta do sistema
     if(msg.sender==='__SISTEMA__'){
       const a=document.createElement('div');
-      a.className='msg-bubble alert-msg';a.textContent=msg.text;c.appendChild(a);return;
+      a.className='msg-bubble alert-msg';
+      a.textContent=msg.text;
+      c.appendChild(a);
+      return;
     }
     const isMine=msg.sender===user.name;
     const b=document.createElement('div');
     b.className='msg-bubble '+(isMine?'mine':'other')+(msg._sending?' sending':'');
     if(!isMine){const s=document.createElement('div');s.className='msg-sender';s.textContent=msg.sender;b.appendChild(s);}
-
-    if(msg.is_image&&msg.file_url){
-      const img=document.createElement('img');
-      img.className='msg-img loading';
-      img.src=msg.file_url;
-      img.onload=()=>img.classList.replace('loading','loaded');
-      img.onclick=()=>abrirPreview(msg.file_url);
-      b.appendChild(img);
-    } else if(msg.file_url&&!msg.is_image){
-      const link=document.createElement('a');
-      link.className='msg-file';link.href=msg.file_url;link.target='_blank';
-      link.innerHTML='<div class="msg-file-icon">📄</div><div class="msg-file-info"><div class="msg-file-name">'+(msg.file_name||'Arquivo')+'</div><div class="msg-file-size">Toque para abrir</div></div>';
-      b.appendChild(link);
-    } else if(msg.text&&msg.text!=='[IMAGEM]'){
-      const t=document.createElement('div');t.textContent=msg.text;b.appendChild(t);
-    }
-
+    const t=document.createElement('div');t.textContent=msg.text;b.appendChild(t);
     const meta=document.createElement('div');meta.className='msg-meta';
-    meta.innerHTML='<span>'+new Date(msg.sent_at).toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'})+(msg._sending?' · ⏳':'')+'</span>';
+    meta.innerHTML='<span>'+new Date(msg.sent_at).toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'})+(msg._sending?' · ✓':'')+'</span>';
     if(msg.expires_at&&!msg._sending){
       const diff=new Date(msg.expires_at)-new Date();
       const badge=document.createElement('span');
@@ -434,14 +344,19 @@ function subscribeRoom(){
   realtimeSub=sb.channel('room-'+currentRoom)
     .on('postgres_changes',{event:'INSERT',schema:'public',table:'messages',filter:'room_id=eq.'+currentRoom},(payload)=>{
       const msg=payload.new;
+      // Alerta de screenshot de outro membro
       if(msg.sender==='__SISTEMA__'&&!msg.text.includes(user.name)){
         document.getElementById('securityAlertMsg').textContent=msg.text;
         document.getElementById('securityAlert').classList.add('show');
-        ocultarMensagens();setTimeout(()=>revelarMensagens(),4000);
+        ocultarMensagens();
+        setTimeout(()=>{revelarMensagens();},4000);
       }
       const exists=localMessages.some(m=>m.id===msg.id||(m._sending&&m.sender===msg.sender&&m.text===msg.text));
       if(!exists){localMessages.push(msg);renderMessages(localMessages);}
-      else{const idx=localMessages.findIndex(m=>m._sending&&m.sender===msg.sender&&m.text===msg.text);if(idx!==-1){localMessages[idx]={...msg};renderMessages(localMessages);}}
+      else{
+        const idx=localMessages.findIndex(m=>m._sending&&m.sender===msg.sender&&m.text===msg.text);
+        if(idx!==-1){localMessages[idx]={...msg};renderMessages(localMessages);}
+      }
     })
     .on('postgres_changes',{event:'DELETE',schema:'public',table:'messages',filter:'room_id=eq.'+currentRoom},(payload)=>{
       localMessages=localMessages.filter(m=>m.id!==payload.old.id);renderMessages(localMessages);
@@ -469,9 +384,22 @@ async function clearRoom(){
   }
 }
 
-function ttlLabel(ms){if(!ms||ms==0)return'Nunca';if(ms<=3600000)return'1h TTL';if(ms<=21600000)return'6h TTL';if(ms<=86400000)return'24h TTL';if(ms<=259200000)return'3d TTL';return'7d TTL';}
-function timeLeft(e){const d=new Date(e)-new Date();if(d<=0)return'Expirada';const h=Math.floor(d/3600000),m=Math.floor((d%3600000)/60000);return h>0?h+'h '+m+'m':m+'m';}
-function mostrarToast(title,body,danger=false){const div=document.createElement('div');div.className='notif-toast'+(danger?' danger-toast':'');div.innerHTML='<strong>'+(danger?'⚠️ ':'🔒 ')+(title||'VaultChat')+'</strong><br>'+(body||'');document.body.appendChild(div);setTimeout(()=>div.remove(),4000);}
+function ttlLabel(ms){
+  if(!ms||ms==0)return'Nunca';
+  if(ms<=3600000)return'1h TTL';if(ms<=21600000)return'6h TTL';
+  if(ms<=86400000)return'24h TTL';if(ms<=259200000)return'3d TTL';return'7d TTL';
+}
+function timeLeft(e){
+  const d=new Date(e)-new Date();if(d<=0)return'Expirada';
+  const h=Math.floor(d/3600000),m=Math.floor((d%3600000)/60000);
+  return h>0?h+'h '+m+'m':m+'m';
+}
+function mostrarToast(title,body,danger=false){
+  const div=document.createElement('div');
+  div.className='notif-toast'+(danger?' danger-toast':'');
+  div.innerHTML='<strong>'+(danger?'⚠️':'🔒 ')+(title||'VaultChat')+'</strong><br>'+(body||'');
+  document.body.appendChild(div);setTimeout(()=>div.remove(),4000);
+}
 function goLogin(){localStorage.removeItem('vc_token');window.location.href='login.html';}
 setInterval(()=>{if(currentRoom)loadMessages();},60000);
 loadRooms();
@@ -482,7 +410,15 @@ import{initializeApp}from'https://www.gstatic.com/firebasejs/10.7.0/firebase-app
 import{getMessaging,getToken,onMessage}from'https://www.gstatic.com/firebasejs/10.7.0/firebase-messaging.js';
 const app=initializeApp({apiKey:"AIzaSyDyJNu9HnyCIUJYTEJ4KoTeORDVMTXPyzA",authDomain:"vaultchat-dce0b.firebaseapp.com",projectId:"vaultchat-dce0b",storageBucket:"vaultchat-dce0b.firebasestorage.app",messagingSenderId:"936113564920",appId:"1:936113564920:web:0667849eadf3cdb4b19f0d"});
 const messaging=getMessaging(app);
-async function ativar(){try{if(!('Notification'in window))return;const p=await Notification.requestPermission();if(p!=='granted')return;const reg=await navigator.serviceWorker.register('/firebase-messaging-sw.js');const token=await getToken(messaging,{vapidKey:'MzE3MGU3OTAtYTY0Yi00OGU2LWI0NjUtMGU3Y2IyNjVmMzZl',serviceWorkerRegistration:reg});if(token)localStorage.setItem('fcm_token',token);}catch(e){console.log('[VaultChat]',e.message);}}
+async function ativar(){
+  try{
+    if(!('Notification'in window))return;
+    const p=await Notification.requestPermission();if(p!=='granted')return;
+    const reg=await navigator.serviceWorker.register('/firebase-messaging-sw.js');
+    const token=await getToken(messaging,{vapidKey:'MzE3MGU3OTAtYTY0Yi00OGU2LWI0NjUtMGU3Y2IyNjVmMzZl',serviceWorkerRegistration:reg});
+    if(token)localStorage.setItem('fcm_token',token);
+  }catch(e){console.log('[VaultChat]',e.message);}
+}
 onMessage(messaging,(p)=>{const{title,body}=p.notification||{};mostrarToast(title,body);});
 window.addEventListener('load',()=>{const u=JSON.parse(localStorage.getItem('vc_user')||'{}');if(u.name)ativar();});
 </script>

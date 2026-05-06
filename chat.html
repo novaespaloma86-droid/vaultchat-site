@@ -20,13 +20,14 @@ body{background:var(--bg);color:var(--text);font-family:'Syne',sans-serif;displa
 .header-actions{display:flex;gap:6px;flex-shrink:0}
 .btn-small{background:var(--bg3);border:1px solid var(--border);border-radius:8px;padding:5px 10px;color:var(--text);font-size:11px;font-family:'Syne',sans-serif;cursor:pointer;white-space:nowrap}
 .btn-danger{border-color:var(--danger);color:var(--danger)}
+.btn-accent{border-color:var(--accent);color:var(--accent)}
 .rooms-bar{background:var(--bg2);border-bottom:1px solid var(--border);padding:8px 12px;display:flex;gap:6px;overflow-x:auto;flex-shrink:0;scrollbar-width:none}
 .rooms-bar::-webkit-scrollbar{display:none}
-.room-chip{background:var(--bg3);border:1px solid var(--border);border-radius:20px;padding:5px 12px;font-size:12px;cursor:pointer;white-space:nowrap;transition:all .2s;flex-shrink:0;position:relative;display:flex;align-items:center;gap:6px}
+.room-chip{background:var(--bg3);border:1px solid var(--border);border-radius:20px;padding:5px 12px;font-size:12px;cursor:pointer;white-space:nowrap;transition:all .2s;flex-shrink:0;display:flex;align-items:center;gap:6px}
 .room-chip.active{background:var(--accent);border-color:var(--accent);color:#fff;font-weight:700}
-.room-chip.expiring{border-color:#D85A30;color:#D85A30}
+.room-chip.expiring{border-color:var(--danger);color:var(--danger)}
 .room-ttl-mini{font-size:9px;opacity:.7;font-family:monospace}
-.room-delete{background:none;border:none;color:inherit;cursor:pointer;font-size:12px;opacity:.6;padding:0;line-height:1}
+.room-delete{background:none;border:none;color:inherit;cursor:pointer;font-size:12px;opacity:.6;padding:0}
 .room-delete:hover{opacity:1}
 .add-room{background:none;border:1px dashed var(--border);border-radius:20px;padding:5px 12px;font-size:12px;color:var(--muted);cursor:pointer;font-family:'Syne',sans-serif;white-space:nowrap;flex-shrink:0}
 .messages{flex:1;overflow-y:auto;padding:12px;display:flex;flex-direction:column;gap:8px;-webkit-overflow-scrolling:touch;}
@@ -35,12 +36,12 @@ body{background:var(--bg);color:var(--text);font-family:'Syne',sans-serif;displa
 .msg-bubble.other{background:var(--bg3);border:1px solid var(--border);align-self:flex-start;border-bottom-left-radius:4px}
 .msg-bubble.sending{opacity:0.6}
 .msg-bubble.alert-msg{background:rgba(216,90,48,.15);border:1px solid var(--danger);align-self:center;text-align:center;font-size:12px;color:var(--danger);max-width:90%}
+.msg-bubble.system-msg{background:rgba(29,158,117,.1);border:1px solid rgba(29,158,117,.3);align-self:center;text-align:center;font-size:12px;color:var(--accent);max-width:90%}
 .msg-img{max-width:100%;border-radius:8px;display:block;margin-top:6px;cursor:pointer;max-height:200px;object-fit:cover}
 .msg-img.loading{filter:blur(4px);transition:all .3s}
 .msg-img.loaded{filter:none}
 .msg-file{display:flex;align-items:center;gap:8px;background:rgba(0,0,0,.2);border-radius:8px;padding:8px 10px;margin-top:6px;cursor:pointer;text-decoration:none;color:inherit}
 .msg-file-icon{font-size:20px;flex-shrink:0}
-.msg-file-name{font-size:12px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .msg-meta{font-size:10px;opacity:.7;margin-top:4px;display:flex;align-items:center;gap:5px;flex-wrap:wrap}
 .ttl-badge{background:rgba(0,0,0,.3);border-radius:10px;padding:2px 5px;font-size:10px}
 .ttl-urgent{background:rgba(216,90,48,.4);color:#ffaa88}
@@ -64,7 +65,7 @@ body{background:var(--bg);color:var(--text);font-family:'Syne',sans-serif;displa
 .send-btn:active{opacity:.7;transform:scale(.95)}
 .modal{position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,.85);display:none;align-items:flex-end;justify-content:center;z-index:1000}
 @media(min-width:600px){.modal{align-items:center}}
-.modal-card{background:var(--bg2);border:1px solid var(--border);border-radius:18px 18px 0 0;padding:24px;width:100%;max-width:480px}
+.modal-card{background:var(--bg2);border:1px solid var(--border);border-radius:18px 18px 0 0;padding:24px;width:100%;max-width:480px;max-height:85vh;overflow-y:auto}
 @media(min-width:600px){.modal-card{border-radius:18px}}
 .modal-title{font-size:17px;font-weight:800;margin-bottom:16px}
 .field{margin-bottom:12px}
@@ -72,6 +73,11 @@ body{background:var(--bg);color:var(--text);font-family:'Syne',sans-serif;displa
 .field input,.field select{width:100%;background:var(--bg3);border:1px solid var(--border);border-radius:10px;padding:12px 14px;color:var(--text);font-size:15px;font-family:'Syne',sans-serif;outline:none}
 .btn-full{width:100%;padding:13px;background:var(--accent);border:none;border-radius:12px;color:#fff;font-size:15px;font-family:'Syne',sans-serif;font-weight:800;cursor:pointer;margin-top:4px}
 .btn-cancel-modal{width:100%;padding:11px;background:transparent;border:1px solid var(--border);border-radius:12px;color:var(--muted);font-size:14px;font-family:'Syne',sans-serif;cursor:pointer;margin-top:8px}
+.invite-box{background:var(--bg3);border:1px solid var(--border);border-radius:10px;padding:12px;margin-top:8px}
+.invite-link{font-size:11px;font-family:monospace;color:var(--accent);word-break:break-all;margin-bottom:8px}
+.members-list{display:flex;flex-direction:column;gap:8px;margin-top:8px}
+.member-item{display:flex;align-items:center;gap:8px;font-size:13px}
+.member-avatar{width:28px;height:28px;border-radius:50%;background:rgba(29,158,117,.2);color:var(--accent);display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;flex-shrink:0}
 .screenshot-overlay{position:fixed;inset:0;background:var(--bg);z-index:99999;display:none;align-items:center;justify-content:center;flex-direction:column;gap:12px}
 .screenshot-overlay.show{display:flex}
 .security-alert{position:fixed;inset:0;background:rgba(216,90,48,.95);z-index:99998;display:none;align-items:center;justify-content:center;flex-direction:column;gap:16px;padding:32px;text-align:center}
@@ -121,6 +127,7 @@ body{background:var(--bg);color:var(--text);font-family:'Syne',sans-serif;displa
     </div>
   </div>
   <div class="header-actions">
+    <button class="btn-small btn-accent" id="inviteBtn" onclick="showInvite()" style="display:none">👥 Convidar</button>
     <button class="btn-small" onclick="showNewRoom()">+ Sala</button>
     <button class="btn-small btn-danger" onclick="clearRoom()">Limpar</button>
     <button class="btn-small" onclick="goLogin()">Sair</button>
@@ -164,6 +171,7 @@ body{background:var(--bg);color:var(--text);font-family:'Syne',sans-serif;displa
   </div>
 </div>
 
+<!-- MODAL NOVA SALA -->
 <div class="modal" id="newRoomModal">
   <div class="modal-card">
     <div class="modal-title">🏠 Nova Sala</div>
@@ -183,7 +191,7 @@ body{background:var(--bg);color:var(--text);font-family:'Syne',sans-serif;displa
       </select>
     </div>
     <div class="field">
-      <label>⏱ A sala se autodestrói em</label>
+      <label>⏱ Sala se autodestrói em</label>
       <select id="roomExpireInput">
         <option value="3600000">1 hora</option>
         <option value="21600000">6 horas</option>
@@ -195,7 +203,30 @@ body{background:var(--bg);color:var(--text);font-family:'Syne',sans-serif;displa
       </select>
     </div>
     <button class="btn-full" onclick="createRoom()">Criar sala</button>
-    <button class="btn-cancel-modal" onclick="closeModal()">Cancelar</button>
+    <button class="btn-cancel-modal" onclick="closeModal('newRoomModal')">Cancelar</button>
+  </div>
+</div>
+
+<!-- MODAL CONVITE -->
+<div class="modal" id="inviteModal">
+  <div class="modal-card">
+    <div class="modal-title">👥 Convidar para a sala</div>
+    
+    <div style="font-size:13px;color:var(--muted);margin-bottom:12px">Compartilhe o link abaixo com quem quiser convidar:</div>
+    
+    <div class="invite-box">
+      <div class="invite-link" id="inviteLink">Gerando link...</div>
+      <button class="btn-full" onclick="copiarLink()" style="margin-top:0;padding:10px">📋 Copiar link</button>
+    </div>
+
+    <div style="margin-top:16px">
+      <div style="font-size:11px;color:var(--muted);font-weight:600;text-transform:uppercase;margin-bottom:8px">Membros da sala</div>
+      <div class="members-list" id="membersList">
+        <div style="font-size:13px;color:var(--muted)">Carregando...</div>
+      </div>
+    </div>
+
+    <button class="btn-cancel-modal" onclick="closeModal('inviteModal')">Fechar</button>
   </div>
 </div>
 
@@ -204,9 +235,108 @@ const SUPABASE_URL='https://exkspbpamuqzzrbpbflx.supabase.co';
 const SUPABASE_KEY='sb_publishable_AqEz3N2R5apg8tGG0rDu5w_2L92h4ya';
 const sb=supabase.createClient(SUPABASE_URL,SUPABASE_KEY);
 const user=JSON.parse(localStorage.getItem('vc_user')||'{"name":"Usuário","email":""}');
-let currentRoom=null,realtimeSub=null,localMessages=[],screenshotCooldown=false;
+let currentRoom=null,currentRoomData=null,realtimeSub=null,localMessages=[],screenshotCooldown=false;
 
 if(!localStorage.getItem('vc_token'))window.location.href='login.html';
+
+// Verifica se entrou por convite
+const urlParams=new URLSearchParams(window.location.search);
+const inviteToken=urlParams.get('invite');
+if(inviteToken)processarConvite(inviteToken);
+
+// ═══ CONVITES ═══
+async function processarConvite(token){
+  const{data:invite}=await sb.from('invites').select('*').eq('token',token).single();
+  if(!invite){mostrarToast('Link inválido ou expirado','',true);return;}
+  if(invite.expires_at&&new Date(invite.expires_at)<new Date()){mostrarToast('Convite expirado','',true);return;}
+  if(invite.used_count>=invite.max_uses){mostrarToast('Convite atingiu limite de usos','',true);return;}
+
+  // Registra membro
+  await sb.from('room_members').upsert({
+    id:invite.room_id+'_'+user.email,
+    room_id:invite.room_id,
+    user_email:user.email||user.name,
+    user_name:user.name,
+    invited_by:invite.created_by
+  });
+
+  // Incrementa uso
+  await sb.from('invites').update({used_count:invite.used_count+1}).eq('token',token);
+
+  // Envia mensagem de boas-vindas
+  await sb.from('messages').insert({
+    id:'join_'+Date.now(),
+    room_id:invite.room_id,
+    sender:'__SISTEMA__',
+    text:'👋 '+user.name+' entrou na sala.',
+    sent_at:new Date().toISOString(),
+    expires_at:new Date(Date.now()+86400000).toISOString()
+  });
+
+  // Remove token da URL
+  window.history.replaceState({},'',window.location.pathname);
+  mostrarToast('Bem-vindo à sala!','Você foi adicionado com sucesso.');
+
+  // Seleciona a sala
+  await loadRooms();
+  const{data:room}=await sb.from('rooms').select('*').eq('id',invite.room_id).single();
+  if(room)selectRoom(room);
+}
+
+async function showInvite(){
+  if(!currentRoom)return;
+  document.getElementById('inviteModal').style.display='flex';
+
+  // Gera ou busca token existente
+  let{data:invite}=await sb.from('invites').select('*').eq('room_id',currentRoom).order('created_at',{ascending:false}).limit(1).single();
+
+  if(!invite||new Date(invite.expires_at)<new Date()){
+    const token=Math.random().toString(36).substr(2,12)+Date.now().toString(36);
+    const{data:newInvite}=await sb.from('invites').insert({
+      id:'inv_'+Date.now(),
+      room_id:currentRoom,
+      token,
+      created_by:user.name,
+      expires_at:new Date(Date.now()+7*24*3600000).toISOString(),
+      max_uses:50
+    }).select().single();
+    invite=newInvite;
+  }
+
+  if(invite){
+    const link=window.location.origin+window.location.pathname+'?invite='+invite.token;
+    document.getElementById('inviteLink').textContent=link;
+    document.getElementById('inviteLink').dataset.link=link;
+  }
+
+  // Carrega membros
+  const{data:members}=await sb.from('room_members').select('*').eq('room_id',currentRoom);
+  const list=document.getElementById('membersList');
+  list.innerHTML='';
+  if(members&&members.length>0){
+    members.forEach(m=>{
+      const div=document.createElement('div');
+      div.className='member-item';
+      div.innerHTML='<div class="member-avatar">'+m.user_name.charAt(0).toUpperCase()+'</div><div><div style="font-size:13px">'+m.user_name+'</div><div style="font-size:10px;color:var(--muted)">'+m.user_email+'</div></div>';
+      list.appendChild(div);
+    });
+  } else {
+    list.innerHTML='<div style="font-size:13px;color:var(--muted)">Nenhum membro ainda. Compartilhe o link!</div>';
+  }
+}
+
+function copiarLink(){
+  const link=document.getElementById('inviteLink').dataset.link||document.getElementById('inviteLink').textContent;
+  navigator.clipboard.writeText(link).then(()=>{
+    mostrarToast('Link copiado!','Cole no WhatsApp ou e-mail');
+  }).catch(()=>{
+    // Fallback para iOS
+    const el=document.createElement('textarea');
+    el.value=link;document.body.appendChild(el);el.select();
+    document.execCommand('copy');document.body.removeChild(el);
+    mostrarToast('Link copiado!','');
+  });
+}
 
 // ═══ SCREENSHOT ═══
 function ocultarMensagens(){document.getElementById('messages').style.filter='blur(20px)';document.getElementById('screenshotOverlay').classList.add('show');}
@@ -225,7 +355,7 @@ document.addEventListener('visibilitychange',()=>{
 });
 function fecharAlerta(){document.getElementById('securityAlert').classList.remove('show');}
 
-// ═══ COMPRESSÃO DE IMAGEM ═══
+// ═══ COMPRESSÃO ═══
 function comprimirImagem(file,maxWidth=1200,qualidade=0.75){
   return new Promise((resolve)=>{
     if(!file.type.startsWith('image/')){resolve(file);return;}
@@ -255,7 +385,6 @@ async function uploadArquivo(input){
   const fill=document.getElementById('progressFill');
   const label=document.getElementById('uploadLabel');
   progress.classList.add('show');
-
   if(isImage){
     const localUrl=URL.createObjectURL(file);
     const tempId='temp_img_'+Date.now();
@@ -294,12 +423,10 @@ function abrirPreview(url){document.getElementById('imgPreviewSrc').src=url;docu
 function fecharPreview(){document.getElementById('imgPreview').classList.remove('show');}
 function autoResize(el){el.style.height='auto';el.style.height=Math.min(el.scrollHeight,80)+'px';}
 
-// ═══ SALAS COM TTL ═══
+// ═══ SALAS ═══
 async function loadRooms(){
   const now=new Date().toISOString();
-  // Apaga salas expiradas
   await sb.from('rooms').delete().lt('expires_at',now).not('expires_at','is',null);
-
   const{data}=await sb.from('rooms').select('*').order('created_at');
   const bar=document.getElementById('roomsBar');
   bar.innerHTML='<button class="add-room" onclick="showNewRoom()">+ Nova sala</button>';
@@ -307,60 +434,50 @@ async function loadRooms(){
     const chip=document.createElement('div');
     const expiring=r.expires_at&&new Date(r.expires_at)-new Date()<3600000;
     chip.className='room-chip'+(currentRoom===r.id?' active':'')+(expiring?' expiring':'');
-
-    const nameSpan=document.createElement('span');
-    nameSpan.textContent=r.name;
-    chip.appendChild(nameSpan);
-
-    // Mini TTL da sala
-    if(r.expires_at){
-      const ttlSpan=document.createElement('span');
-      ttlSpan.className='room-ttl-mini';
-      ttlSpan.textContent='⏱'+timeLeft(r.expires_at);
-      chip.appendChild(ttlSpan);
-    }
-
-    // Botão deletar
-    const delBtn=document.createElement('button');
-    delBtn.className='room-delete';
-    delBtn.textContent='✕';
+    const nameSpan=document.createElement('span');nameSpan.textContent=r.name;chip.appendChild(nameSpan);
+    if(r.expires_at){const ttlSpan=document.createElement('span');ttlSpan.className='room-ttl-mini';ttlSpan.textContent='⏱'+timeLeft(r.expires_at);chip.appendChild(ttlSpan);}
+    const delBtn=document.createElement('button');delBtn.className='room-delete';delBtn.textContent='✕';
     delBtn.onclick=(e)=>{e.stopPropagation();deleteRoom(r.id,r.name);};
     chip.appendChild(delBtn);
-
     chip.onclick=(e)=>{if(e.target!==delBtn)selectRoom(r);};
     bar.appendChild(chip);
   });
 }
 
-async function deleteRoom(roomId, roomName){
-  if(!confirm('Apagar a sala "'+roomName+'" e todas as mensagens?'))return;
+async function deleteRoom(roomId,roomName){
+  if(!confirm('Apagar a sala "'+roomName+'"?'))return;
   await sb.from('messages').delete().eq('room_id',roomId);
   await sb.from('rooms').delete().eq('id',roomId);
   if(currentRoom===roomId){
-    currentRoom=null;
+    currentRoom=null;currentRoomData=null;
     document.getElementById('currentRoomName').textContent='VaultChat';
     document.getElementById('currentRoomTTL').innerHTML='<span class="online-dot"></span>Selecione uma sala';
     document.getElementById('inputArea').style.display='none';
+    document.getElementById('inviteBtn').style.display='none';
     document.getElementById('emptyState').style.display='flex';
-    localMessages=[];
-    renderMessages([]);
+    localMessages=[];renderMessages([]);
   }
   loadRooms();
 }
 
 async function selectRoom(room){
-  // Verifica se sala ainda existe
-  if(room.expires_at&&new Date(room.expires_at)<new Date()){
-    await deleteRoom(room.id,room.name);return;
-  }
-  currentRoom=room.id;localMessages=[];
+  if(room.expires_at&&new Date(room.expires_at)<new Date()){await deleteRoom(room.id,room.name);return;}
+  currentRoom=room.id;currentRoomData=room;localMessages=[];
   document.getElementById('currentRoomName').textContent=room.name;
   let ttlInfo=ttlLabel(room.ttl)+' · E2E';
-  if(room.expires_at)ttlInfo+=' · Sala expira em '+timeLeft(room.expires_at);
+  if(room.expires_at)ttlInfo+=' · Sala: '+timeLeft(room.expires_at);
   document.getElementById('currentRoomTTL').innerHTML='<span class="online-dot"></span>'+ttlInfo;
   document.getElementById('inputArea').style.display='flex';
+  document.getElementById('inviteBtn').style.display='flex';
   document.getElementById('ttlSelect').value=room.ttl||86400000;
   document.getElementById('emptyState').style.display='none';
+
+  // Registra usuário como membro
+  await sb.from('room_members').upsert({
+    id:room.id+'_'+(user.email||user.name),
+    room_id:room.id,user_email:user.email||user.name,user_name:user.name,invited_by:user.name
+  });
+
   loadRooms();await loadMessages();subscribeRoom();
 }
 
@@ -391,13 +508,15 @@ function renderMessages(msgs){
   const c=document.getElementById('messages');
   const atBottom=c.scrollHeight-c.scrollTop-c.clientHeight<50;
   c.innerHTML='';
-  const enc=document.createElement('div');
-  enc.className='enc-badge';
+  const enc=document.createElement('div');enc.className='enc-badge';
   enc.innerHTML='<div class="enc-dot"></div> E2E · Mensagens e salas expiram automaticamente';
   c.appendChild(enc);
   msgs.forEach(msg=>{
     if(msg.sender==='__SISTEMA__'){
-      const a=document.createElement('div');a.className='msg-bubble alert-msg';a.textContent=msg.text;c.appendChild(a);return;
+      const a=document.createElement('div');
+      const isAlert=msg.text.includes('🚨');
+      a.className='msg-bubble '+(isAlert?'alert-msg':'system-msg');
+      a.textContent=msg.text;c.appendChild(a);return;
     }
     const isMine=msg.sender===user.name;
     const b=document.createElement('div');
@@ -409,9 +528,9 @@ function renderMessages(msgs){
       img.onclick=()=>abrirPreview(msg.file_url);b.appendChild(img);
     } else if(msg.file_url&&!msg.is_image){
       const link=document.createElement('a');link.className='msg-file';link.href=msg.file_url;link.target='_blank';
-      link.innerHTML='<div class="msg-file-icon">📄</div><div><div class="msg-file-name">'+(msg.file_name||'Arquivo')+'</div><div style="font-size:10px;opacity:.7">Toque para abrir</div></div>';
+      link.innerHTML='<div class="msg-file-icon">📄</div><div><div style="font-size:12px;font-weight:600">'+(msg.file_name||'Arquivo')+'</div><div style="font-size:10px;opacity:.7">Toque para abrir</div></div>';
       b.appendChild(link);
-    } else if(msg.text&&msg.text!=='[IMAGEM]'&&msg.text!=='[ARQUIVO]'){
+    } else if(msg.text&&!['[IMAGEM]','[ARQUIVO]'].includes(msg.text)){
       const t=document.createElement('div');t.textContent=msg.text;b.appendChild(t);
     }
     const meta=document.createElement('div');meta.className='msg-meta';
@@ -433,7 +552,7 @@ function subscribeRoom(){
   realtimeSub=sb.channel('room-'+currentRoom)
     .on('postgres_changes',{event:'INSERT',schema:'public',table:'messages',filter:'room_id=eq.'+currentRoom},(payload)=>{
       const msg=payload.new;
-      if(msg.sender==='__SISTEMA__'&&!msg.text.includes(user.name)){
+      if(msg.sender==='__SISTEMA__'&&msg.text.includes('🚨')&&!msg.text.includes(user.name)){
         document.getElementById('securityAlertMsg').textContent=msg.text;
         document.getElementById('securityAlert').classList.add('show');
         ocultarMensagens();setTimeout(()=>revelarMensagens(),4000);
@@ -450,7 +569,7 @@ function subscribeRoom(){
 
 function handleKey(e){if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();sendMessage();}}
 function showNewRoom(){document.getElementById('newRoomModal').style.display='flex';setTimeout(()=>document.getElementById('roomNameInput').focus(),100);}
-function closeModal(){document.getElementById('newRoomModal').style.display='none';}
+function closeModal(id){document.getElementById(id||'newRoomModal').style.display='none';}
 
 async function createRoom(){
   const name=document.getElementById('roomNameInput').value.trim();if(!name)return;
@@ -458,7 +577,7 @@ async function createRoom(){
   const expire=parseInt(document.getElementById('roomExpireInput').value);
   const expires_at=expire>0?new Date(Date.now()+expire).toISOString():null;
   const{data}=await sb.from('rooms').insert({id:'room_'+Date.now(),name,ttl,expires_at,created_at:new Date().toISOString()}).select().single();
-  closeModal();document.getElementById('roomNameInput').value='';
+  closeModal('newRoomModal');document.getElementById('roomNameInput').value='';
   await loadRooms();if(data)selectRoom(data);
 }
 
@@ -470,20 +589,18 @@ async function clearRoom(){
   }
 }
 
-function ttlLabel(ms){if(!ms||ms==0)return'Nunca';if(ms<=3600000)return'1h TTL';if(ms<=21600000)return'6h TTL';if(ms<=86400000)return'24h TTL';if(ms<=259200000)return'3d TTL';return'7d TTL';}
+function ttlLabel(ms){if(!ms||ms==0)return'Nunca';if(ms<=3600000)return'1h';if(ms<=21600000)return'6h';if(ms<=86400000)return'24h';if(ms<=259200000)return'3d';return'7d';}
 function timeLeft(e){
   const d=new Date(e)-new Date();if(d<=0)return'Expirada';
-  const dias=Math.floor(d/86400000);
-  const h=Math.floor((d%86400000)/3600000);
-  const m=Math.floor((d%3600000)/60000);
-  if(dias>0)return dias+'d '+h+'h';
-  if(h>0)return h+'h '+m+'m';
-  return m+'m';
+  const dias=Math.floor(d/86400000),h=Math.floor((d%86400000)/3600000),m=Math.floor((d%3600000)/60000);
+  if(dias>0)return dias+'d '+h+'h';if(h>0)return h+'h '+m+'m';return m+'m';
 }
-function mostrarToast(title,body,danger=false){const div=document.createElement('div');div.className='notif-toast'+(danger?' danger-toast':'');div.innerHTML='<strong>'+(danger?'⚠️ ':'🔒 ')+(title||'VaultChat')+'</strong><br>'+(body||'');document.body.appendChild(div);setTimeout(()=>div.remove(),4000);}
+function mostrarToast(title,body,danger=false){
+  const div=document.createElement('div');div.className='notif-toast'+(danger?' danger-toast':'');
+  div.innerHTML='<strong>'+(danger?'⚠️ ':'🔒 ')+(title||'VaultChat')+'</strong>'+(body?'<br>'+body:'');
+  document.body.appendChild(div);setTimeout(()=>div.remove(),4000);
+}
 function goLogin(){localStorage.removeItem('vc_token');window.location.href='login.html';}
-
-// Cleanup a cada minuto
 setInterval(()=>{if(currentRoom)loadMessages();loadRooms();},60000);
 loadRooms();
 </script>

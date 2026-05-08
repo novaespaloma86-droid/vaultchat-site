@@ -304,11 +304,7 @@ async function verify2FA(){
   // Salva sessão
   clearInterval(_timerInterval);
   const sessionUser={
-    name:_pendingUser.name,
-    email:_pendingUser.email||_pendingUser.id,
-    id:_pendingUser.id
-  };
-  localStorage.setItem('vc_token','logged');
+ name:_pendingUser.name||'Usuario',c_token','logged');
   localStorage.setItem('vc_user',JSON.stringify(sessionUser));
 
   showMsg2FA('✅ Verificado! Entrando...','success');

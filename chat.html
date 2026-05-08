@@ -619,7 +619,10 @@ const app=initializeApp({apiKey:"AIzaSyDyJNu9HnyCIUJYTEJ4KoTeORDVMTXPyzA",authDo
 const messaging=getMessaging(app);
 async function ativar(){try{if(!('Notification'in window))return;const p=await Notification.requestPermission();if(p!=='granted')return;const reg=await navigator.serviceWorker.register('/firebase-messaging-sw.js');const token=await getToken(messaging,{vapidKey:'MzE3MGU3OTAtYTY0Yi00OGU2LWI0NjUtMGU3Y2IyNjVmMzZl',serviceWorkerRegistration:reg});if(token)localStorage.setItem('fcm_token',token);}catch(e){console.log('[VaultChat]',e.message);}}
 onMessage(messaging,(p)=>{const{title,body}=p.notification||{};mostrarToast(title,body);});
-window.addEventListener('load',()=>{const u=JSON.parse(localStorage.getItem('vc_user')||'{}');if(u.name)ativar();});
+window.addEventListener('load',()=>{const u=JSON.parse(localStorage.getItem('vc_user')||'{}');if(u.name)ativar();});cd C:\Users\Yasmin\Documents\vaultchat-site
+git add chat.html
+git commit -m "chamadas de voz e video WebRTC"
+git push
 </script>
 </body>
 </html>

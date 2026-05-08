@@ -6,6 +6,7 @@
 <title>VaultChat — Chat Seguro</title>
 <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&display=swap" rel="stylesheet"/>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="calls.js"></script>
 <style>
 *{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
 :root{--bg:#0A0B0D;--bg2:#0F1114;--bg3:#161820;--border:#2A2D38;--text:#F0EEE8;--muted:#7A7D8A;--accent:#1D9E75;--danger:#D85A30;}
@@ -25,14 +26,7 @@ body{background:var(--bg);color:var(--text);font-family:'Syne',sans-serif;displa
 .rooms-bar::-webkit-scrollbar{display:none}
 .room-chip{background:var(--bg3);border:1px solid var(--border);border-radius:20px;padding:5px 12px;font-size:12px;cursor:pointer;white-space:nowrap;transition:all .2s;flex-shrink:0;display:flex;align-items:center;gap:6px}
 .room-chip.active{background:var(--accent);border-color:var(--accent);color:#fff;font-weight:700}
-.room-chip.expiring{border-color:var(--danger);color:var(--danger)}<!DOCTYPE html>
-<html lang="pt-BR">
-<head>
-<meta charset="UTF-8"/>
-<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"/>
-<title>VaultChat — Chat Seguro</title>
-<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&display=swap" rel="stylesheet"/>
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+.room-chip.expiring{border-color:var(--danger);color:var(--danger)}
 .room-ttl-mini{font-size:9px;opacity:.7;font-family:monospace}
 .room-delete{background:none;border:none;color:inherit;cursor:pointer;font-size:12px;opacity:.6;padding:0}
 .room-delete:hover{opacity:1}
@@ -97,6 +91,52 @@ body{background:var(--bg);color:var(--text);font-family:'Syne',sans-serif;displa
 .img-preview.show{display:flex}
 .img-preview img{max-width:95%;max-height:90vh;border-radius:8px;object-fit:contain}
 .img-preview-close{position:absolute;top:16px;right:16px;background:rgba(255,255,255,.2);border:none;color:white;width:36px;height:36px;border-radius:50%;font-size:18px;cursor:pointer}
+
+/* ── BOTÕES DE CHAMADA NO HEADER ── */
+.call-btns{display:flex;gap:4px;flex-shrink:0}
+.btn-call{background:var(--bg3);border:1px solid var(--border);border-radius:8px;width:34px;height:34px;cursor:pointer;font-size:15px;display:flex;align-items:center;justify-content:center;transition:all .2s}
+.btn-call:hover{border-color:var(--accent);background:rgba(29,158,117,.15)}
+.btn-call:active{transform:scale(.92)}
+
+/* ── CHAMADA RECEBIDA ── */
+#vc-incoming-call{position:fixed;inset:0;background:rgba(0,0,0,.8);backdrop-filter:blur(10px);z-index:9999;display:none;align-items:center;justify-content:center;animation:vc-fadeIn .3s ease}
+.vc-incoming-inner{background:#1a1a2e;border:1px solid rgba(255,255,255,.1);border-radius:24px;padding:40px 32px 32px;text-align:center;width:290px;box-shadow:0 20px 60px rgba(0,0,0,.6)}
+.vc-incoming-avatar{font-size:60px;margin-bottom:12px;animation:vc-pulse 1.4s infinite}
+.vc-incoming-type{font-size:12px;color:#888;margin-bottom:5px}
+.vc-incoming-name{font-size:21px;font-weight:800;color:#fff;margin-bottom:4px;font-family:'Syne',sans-serif}
+.vc-incoming-subtitle{font-size:13px;color:#555;margin-bottom:26px}
+.vc-incoming-actions{display:flex;justify-content:center;gap:18px;margin-bottom:8px}
+.vc-incoming-actions button{width:58px;height:58px;border-radius:50%;border:none;font-size:22px;cursor:pointer;transition:transform .15s}
+.vc-incoming-actions button:hover{transform:scale(1.1)}
+.vc-btn-reject{background:#e74c3c}
+.vc-btn-accept-audio{background:#2980b9}
+.vc-btn-accept-video{background:#27ae60}
+.vc-incoming-labels{display:flex;justify-content:center;gap:18px;font-size:10px;color:#555}
+.vc-incoming-labels span{width:58px;text-align:center}
+
+/* ── CHAMADA ATIVA ── */
+#vc-call-ui{position:fixed;bottom:80px;right:16px;width:320px;background:#0d0d1a;border:1px solid rgba(255,255,255,.08);border-radius:20px;z-index:9998;flex-direction:column;overflow:hidden;box-shadow:0 10px 40px rgba(0,0,0,.7);display:none;animation:vc-slideUp .3s ease}
+#vc-call-ui.minimized .vc-videos-area{display:none}
+#vc-call-ui.minimized{width:190px}
+.vc-call-header{display:flex;justify-content:space-between;align-items:center;padding:9px 13px;background:rgba(255,255,255,.03);border-bottom:1px solid rgba(255,255,255,.05)}
+.vc-status{font-size:11px;color:#aaa;font-family:'Syne',sans-serif}
+.vc-btn-minimize{background:none;border:none;color:#555;cursor:pointer;font-size:15px;padding:2px 5px}
+.vc-videos-area{position:relative;width:100%;height:190px;background:#000}
+.vc-remote-grid{display:flex;width:100%;height:100%;gap:2px}
+.vc-remote-wrapper{flex:1;background:#111;overflow:hidden}
+.vc-remote-video{width:100%;height:100%;object-fit:cover}
+.vc-local-video{position:absolute;bottom:8px;right:8px;width:76px;height:58px;border-radius:8px;border:2px solid rgba(255,255,255,.25);object-fit:cover;background:#1a1a1a;z-index:10}
+.vc-controls{display:flex;justify-content:center;gap:10px;padding:12px}
+.vc-ctrl-btn{width:46px;height:46px;border-radius:50%;border:none;background:rgba(255,255,255,.07);font-size:19px;cursor:pointer;transition:all .15s}
+.vc-ctrl-btn:hover{background:rgba(255,255,255,.14);transform:scale(1.05)}
+.vc-btn-end{background:#e74c3c!important}
+.vc-btn-end:hover{background:#c0392b!important}
+.vc-no-video{display:flex;align-items:center;justify-content:center;width:100%;height:100%;font-size:36px;background:#111}
+
+@keyframes vc-fadeIn{from{opacity:0}to{opacity:1}}
+@keyframes vc-slideUp{from{transform:translateY(16px);opacity:0}to{transform:translateY(0);opacity:1}}
+@keyframes vc-pulse{0%,100%{transform:scale(1)}50%{transform:scale(1.07)}}
+
 @media(min-width:768px){
   .room-name{max-width:300px}
   .msg-bubble{max-width:60%}
@@ -125,6 +165,43 @@ body{background:var(--bg);color:var(--text);font-family:'Syne',sans-serif;displa
   <img id="imgPreviewSrc" src="" alt=""/>
 </div>
 
+<!-- CHAMADA RECEBIDA -->
+<div id="vc-incoming-call">
+  <div class="vc-incoming-inner">
+    <div class="vc-incoming-avatar">👤</div>
+    <div id="vc-call-type" class="vc-incoming-type">📹 Chamada de vídeo</div>
+    <div id="vc-caller-name" class="vc-incoming-name">Usuário</div>
+    <p class="vc-incoming-subtitle">está te chamando...</p>
+    <div class="vc-incoming-actions">
+      <button class="vc-btn-reject" onclick="rejectIncoming()">✕</button>
+      <button class="vc-btn-accept-audio" onclick="acceptIncoming(false)">🎧</button>
+      <button class="vc-btn-accept-video" onclick="acceptIncoming(true)">✓</button>
+    </div>
+    <div class="vc-incoming-labels">
+      <span>Recusar</span><span>Só voz</span><span>Aceitar</span>
+    </div>
+  </div>
+</div>
+
+<!-- CHAMADA ATIVA -->
+<div id="vc-call-ui">
+  <div class="vc-call-header">
+    <span id="vc-call-status" class="vc-status">🔴 Conectando...</span>
+    <button class="vc-btn-minimize" onclick="document.getElementById('vc-call-ui').classList.toggle('minimized')">⬇</button>
+  </div>
+  <div class="vc-videos-area">
+    <div id="vc-remote-videos" class="vc-remote-grid">
+      <div class="vc-no-video" id="vc-waiting">⏳</div>
+    </div>
+    <video id="vc-local-video" class="vc-local-video" autoplay muted playsinline></video>
+  </div>
+  <div class="vc-controls">
+    <button id="vc-btn-mute" class="vc-ctrl-btn" onclick="VaultCallAPI.toggleMute()" title="Silenciar">🎤</button>
+    <button id="vc-btn-video" class="vc-ctrl-btn" onclick="VaultCallAPI.toggleVideo()" title="Câmera">📹</button>
+    <button class="vc-ctrl-btn vc-btn-end" onclick="VaultCallAPI.end()" title="Encerrar">📵</button>
+  </div>
+</div>
+
 <div class="header">
   <div class="header-left">
     <div class="logo-icon">🔒</div>
@@ -134,6 +211,11 @@ body{background:var(--bg);color:var(--text);font-family:'Syne',sans-serif;displa
     </div>
   </div>
   <div class="header-actions">
+    <!-- BOTÕES DE CHAMADA (aparecem só quando sala está selecionada) -->
+    <div class="call-btns" id="callBtns" style="display:none">
+      <button class="btn-call" onclick="iniciarChamada(false)" title="Chamada de voz">📞</button>
+      <button class="btn-call" onclick="iniciarChamada(true)" title="Chamada de vídeo">📹</button>
+    </div>
     <button class="btn-small btn-accent" id="inviteBtn" onclick="showInvite()" style="display:none">👥 Convidar</button>
     <button class="btn-small" onclick="showNewRoom()">+ Sala</button>
     <button class="btn-small btn-danger" onclick="clearRoom()">Limpar</button>
@@ -218,21 +300,15 @@ body{background:var(--bg);color:var(--text);font-family:'Syne',sans-serif;displa
 <div class="modal" id="inviteModal">
   <div class="modal-card">
     <div class="modal-title">👥 Convidar para a sala</div>
-    
     <div style="font-size:13px;color:var(--muted);margin-bottom:12px">Compartilhe o link abaixo com quem quiser convidar:</div>
-    
     <div class="invite-box">
       <div class="invite-link" id="inviteLink">Gerando link...</div>
       <button class="btn-full" onclick="copiarLink()" style="margin-top:0;padding:10px">📋 Copiar link</button>
     </div>
-
     <div style="margin-top:16px">
       <div style="font-size:11px;color:var(--muted);font-weight:600;text-transform:uppercase;margin-bottom:8px">Membros da sala</div>
-      <div class="members-list" id="membersList">
-        <div style="font-size:13px;color:var(--muted)">Carregando...</div>
-      </div>
+      <div class="members-list" id="membersList"><div style="font-size:13px;color:var(--muted)">Carregando...</div></div>
     </div>
-
     <button class="btn-cancel-modal" onclick="closeModal('inviteModal')">Fechar</button>
   </div>
 </div>
@@ -243,48 +319,107 @@ const SUPABASE_KEY='sb_publishable_AqEz3N2R5apg8tGG0rDu5w_2L92h4ya';
 const sb=supabase.createClient(SUPABASE_URL,SUPABASE_KEY);
 const user=JSON.parse(localStorage.getItem('vc_user')||'{"name":"Usuário","email":""}');
 let currentRoom=null,currentRoomData=null,realtimeSub=null,localMessages=[],screenshotCooldown=false;
+let _pendingInvite=null;
 
 if(!localStorage.getItem('vc_token'))window.location.href='login.html';
 
-// Verifica se entrou por convite
+// ═══ INICIALIZAR CHAMADAS ═══
+window.addEventListener('DOMContentLoaded',()=>{
+  VaultCallAPI.init(user.name, sb);
+  VaultCallAPI.listenForIncomingCalls(user.name, sb);
+});
+
+// ═══ FUNÇÕES DE CHAMADA ═══
+async function iniciarChamada(isVideo){
+  if(!currentRoom){mostrarToast('Selecione uma sala primeiro','',true);return;}
+  // Buscar membros da sala para chamar
+  const{data:members}=await sb.from('room_members').select('*').eq('room_id',currentRoom);
+  const participantes=(members||[]).map(m=>m.user_name).filter(n=>n!==user.name);
+  if(participantes.length===0){mostrarToast('Nenhum outro membro nesta sala','',true);return;}
+  const todos=[user.name,...participantes];
+  document.getElementById('vc-waiting').style.display='flex';
+  document.getElementById('vc-call-status').textContent='🔴 Chamando...';
+  await VaultCallAPI.start(currentRoom, todos, isVideo);
+}
+
+function acceptIncoming(withVideo){
+  if(!_pendingInvite)return;
+  const d={..._pendingInvite, isVideo: withVideo};
+  _pendingInvite=null;
+  document.getElementById('vc-incoming-call').style.display='none';
+  VaultCallAPI.accept(d);
+}
+
+function rejectIncoming(){
+  if(!_pendingInvite)return;
+  VaultCallAPI.reject(_pendingInvite);
+  _pendingInvite=null;
+  document.getElementById('vc-incoming-call').style.display='none';
+}
+
+// Sobrescrever showIncomingCallUI para salvar dados
+const _origShowIncoming = window.showIncomingCallUI;
+window.showIncomingCallUI = function(data){
+  _pendingInvite = data;
+  document.getElementById('vc-incoming-call').style.display='flex';
+  document.getElementById('vc-caller-name').textContent = data.from;
+  document.getElementById('vc-call-type').textContent = data.isVideo ? '📹 Chamada de vídeo' : '📞 Chamada de voz';
+};
+
+// Atualizar status quando conectar
+window.addRemoteVideo = function(peerId, stream){
+  document.getElementById('vc-waiting').style.display='none';
+  document.getElementById('vc-call-status').textContent='🟢 Em chamada';
+  const container=document.getElementById('vc-remote-videos');
+  let wrapper=document.getElementById('vc-wrapper-'+peerId);
+  if(!wrapper){
+    wrapper=document.createElement('div');
+    wrapper.className='vc-remote-wrapper';
+    wrapper.id='vc-wrapper-'+peerId;
+    const v=document.createElement('video');
+    v.id='vc-remote-'+peerId;
+    v.autoplay=true;v.playsinline=true;v.className='vc-remote-video';
+    wrapper.appendChild(v);
+    container.appendChild(wrapper);
+  }
+  document.getElementById('vc-remote-'+peerId).srcObject=stream;
+  document.getElementById('vc-remote-'+peerId).play().catch(()=>{});
+};
+
+window.removeRemoteVideo = function(peerId){
+  const w=document.getElementById('vc-wrapper-'+peerId);
+  if(w)w.remove();
+};
+
+window.hideCallUI = function(){
+  document.getElementById('vc-call-ui').style.display='none';
+  document.getElementById('vc-remote-videos').innerHTML='<div class="vc-no-video" id="vc-waiting">⏳</div>';
+};
+
+window.showCallUI = function(isVideo){
+  document.getElementById('vc-call-ui').style.display='flex';
+};
+
+window.setLocalVideo = function(stream){
+  const v=document.getElementById('vc-local-video');
+  if(v){v.srcObject=stream;v.muted=true;v.play().catch(()=>{});}
+};
+
+// ═══ CONVITES ═══
 const urlParams=new URLSearchParams(window.location.search);
 const inviteToken=urlParams.get('invite');
 if(inviteToken)processarConvite(inviteToken);
 
-// ═══ CONVITES ═══
 async function processarConvite(token){
   const{data:invite}=await sb.from('invites').select('*').eq('token',token).single();
   if(!invite){mostrarToast('Link inválido ou expirado','',true);return;}
   if(invite.expires_at&&new Date(invite.expires_at)<new Date()){mostrarToast('Convite expirado','',true);return;}
   if(invite.used_count>=invite.max_uses){mostrarToast('Convite atingiu limite de usos','',true);return;}
-
-  // Registra membro
-  await sb.from('room_members').upsert({
-    id:invite.room_id+'_'+user.email,
-    room_id:invite.room_id,
-    user_email:user.email||user.name,
-    user_name:user.name,
-    invited_by:invite.created_by
-  });
-
-  // Incrementa uso
+  await sb.from('room_members').upsert({id:invite.room_id+'_'+user.email,room_id:invite.room_id,user_email:user.email||user.name,user_name:user.name,invited_by:invite.created_by});
   await sb.from('invites').update({used_count:invite.used_count+1}).eq('token',token);
-
-  // Envia mensagem de boas-vindas
-  await sb.from('messages').insert({
-    id:'join_'+Date.now(),
-    room_id:invite.room_id,
-    sender:'__SISTEMA__',
-    text:'👋 '+user.name+' entrou na sala.',
-    sent_at:new Date().toISOString(),
-    expires_at:new Date(Date.now()+86400000).toISOString()
-  });
-
-  // Remove token da URL
+  await sb.from('messages').insert({id:'join_'+Date.now(),room_id:invite.room_id,sender:'__SISTEMA__',text:'👋 '+user.name+' entrou na sala.',sent_at:new Date().toISOString(),expires_at:new Date(Date.now()+86400000).toISOString()});
   window.history.replaceState({},'',window.location.pathname);
   mostrarToast('Bem-vindo à sala!','Você foi adicionado com sucesso.');
-
-  // Seleciona a sala
   await loadRooms();
   const{data:room}=await sb.from('rooms').select('*').eq('id',invite.room_id).single();
   if(room)selectRoom(room);
@@ -293,37 +428,23 @@ async function processarConvite(token){
 async function showInvite(){
   if(!currentRoom)return;
   document.getElementById('inviteModal').style.display='flex';
-
-  // Gera ou busca token existente
   let{data:invite}=await sb.from('invites').select('*').eq('room_id',currentRoom).order('created_at',{ascending:false}).limit(1).single();
-
   if(!invite||new Date(invite.expires_at)<new Date()){
     const token=Math.random().toString(36).substr(2,12)+Date.now().toString(36);
-    const{data:newInvite}=await sb.from('invites').insert({
-      id:'inv_'+Date.now(),
-      room_id:currentRoom,
-      token,
-      created_by:user.name,
-      expires_at:new Date(Date.now()+7*24*3600000).toISOString(),
-      max_uses:50
-    }).select().single();
+    const{data:newInvite}=await sb.from('invites').insert({id:'inv_'+Date.now(),room_id:currentRoom,token,created_by:user.name,expires_at:new Date(Date.now()+7*24*3600000).toISOString(),max_uses:50}).select().single();
     invite=newInvite;
   }
-
   if(invite){
     const link=window.location.origin+window.location.pathname+'?invite='+invite.token;
     document.getElementById('inviteLink').textContent=link;
     document.getElementById('inviteLink').dataset.link=link;
   }
-
-  // Carrega membros
   const{data:members}=await sb.from('room_members').select('*').eq('room_id',currentRoom);
   const list=document.getElementById('membersList');
   list.innerHTML='';
   if(members&&members.length>0){
     members.forEach(m=>{
-      const div=document.createElement('div');
-      div.className='member-item';
+      const div=document.createElement('div');div.className='member-item';
       div.innerHTML='<div class="member-avatar">'+m.user_name.charAt(0).toUpperCase()+'</div><div><div style="font-size:13px">'+m.user_name+'</div><div style="font-size:10px;color:var(--muted)">'+m.user_email+'</div></div>';
       list.appendChild(div);
     });
@@ -334,14 +455,8 @@ async function showInvite(){
 
 function copiarLink(){
   const link=document.getElementById('inviteLink').dataset.link||document.getElementById('inviteLink').textContent;
-  navigator.clipboard.writeText(link).then(()=>{
-    mostrarToast('Link copiado!','Cole no WhatsApp ou e-mail');
-  }).catch(()=>{
-    // Fallback para iOS
-    const el=document.createElement('textarea');
-    el.value=link;document.body.appendChild(el);el.select();
-    document.execCommand('copy');document.body.removeChild(el);
-    mostrarToast('Link copiado!','');
+  navigator.clipboard.writeText(link).then(()=>{mostrarToast('Link copiado!','Cole no WhatsApp ou e-mail');}).catch(()=>{
+    const el=document.createElement('textarea');el.value=link;document.body.appendChild(el);el.select();document.execCommand('copy');document.body.removeChild(el);mostrarToast('Link copiado!','');
   });
 }
 
@@ -461,6 +576,7 @@ async function deleteRoom(roomId,roomName){
     document.getElementById('currentRoomTTL').innerHTML='<span class="online-dot"></span>Selecione uma sala';
     document.getElementById('inputArea').style.display='none';
     document.getElementById('inviteBtn').style.display='none';
+    document.getElementById('callBtns').style.display='none';
     document.getElementById('emptyState').style.display='flex';
     localMessages=[];renderMessages([]);
   }
@@ -476,15 +592,10 @@ async function selectRoom(room){
   document.getElementById('currentRoomTTL').innerHTML='<span class="online-dot"></span>'+ttlInfo;
   document.getElementById('inputArea').style.display='flex';
   document.getElementById('inviteBtn').style.display='flex';
+  document.getElementById('callBtns').style.display='flex';
   document.getElementById('ttlSelect').value=room.ttl||86400000;
   document.getElementById('emptyState').style.display='none';
-
-  // Registra usuário como membro
-  await sb.from('room_members').upsert({
-    id:room.id+'_'+(user.email||user.name),
-    room_id:room.id,user_email:user.email||user.name,user_name:user.name,invited_by:user.name
-  });
-
+  await sb.from('room_members').upsert({id:room.id+'_'+(user.email||user.name),room_id:room.id,user_email:user.email||user.name,user_name:user.name,invited_by:user.name});
   loadRooms();await loadMessages();subscribeRoom();
 }
 
@@ -619,15 +730,7 @@ const app=initializeApp({apiKey:"AIzaSyDyJNu9HnyCIUJYTEJ4KoTeORDVMTXPyzA",authDo
 const messaging=getMessaging(app);
 async function ativar(){try{if(!('Notification'in window))return;const p=await Notification.requestPermission();if(p!=='granted')return;const reg=await navigator.serviceWorker.register('/firebase-messaging-sw.js');const token=await getToken(messaging,{vapidKey:'MzE3MGU3OTAtYTY0Yi00OGU2LWI0NjUtMGU3Y2IyNjVmMzZl',serviceWorkerRegistration:reg});if(token)localStorage.setItem('fcm_token',token);}catch(e){console.log('[VaultChat]',e.message);}}
 onMessage(messaging,(p)=>{const{title,body}=p.notification||{};mostrarToast(title,body);});
-window.addEventListener('load',()=>{const u=JSON.parse(localStorage.getItem('vc_user')||'{}');if(u.name)ativar();});cd C:\Users\Yasmin\Documents\vaultchat-site
-git add chat.html
-git commit -m "chamadas de voz e video WebRTC"
-git push
+window.addEventListener('load',()=>{const u=JSON.parse(localStorage.getItem('vc_user')||'{}');if(u.name)ativar();});
 </script>
 </body>
-</html>cd C:\Users\Yasmin\Documents\vaultchat-site
-git add chat.html
-git commit -m "chamadas de voz e video WebRTC"
-git push
-
-git pull --rebase git push
+</html>

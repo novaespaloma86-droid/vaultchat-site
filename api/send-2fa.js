@@ -1,4 +1,3 @@
- 
 export default async function handler(req, res) {
   if (req.method !== 'POST') return res.status(405).json({ error: 'Method not allowed' });
   const { email, code, nome } = req.body;
@@ -13,8 +12,8 @@ export default async function handler(req, res) {
       body: JSON.stringify({
         from: 'VaultChat <onboarding@resend.dev>',
         to: [email],
-        subject: '🔐 Seu código VaultChat',
-        html: `<div style="background:#0A0B0D;padding:40px;font-family:sans-serif;text-align:center"><div style="background:#0F1114;border:1px solid #2A2D38;border-radius:18px;padding:40px;max-width:400px;margin:0 auto"><div style="font-size:40px;margin-bottom:16px">🔒</div><h2 style="color:#F0EEE8;margin:0 0 8px">VaultChat</h2><p style="color:#7A7D8A;margin:0 0 24px">Olá ${nome || 'Usuário'}! Seu código:</p><div style="background:#161820;border:1px solid #1D9E75;border-radius:14px;padding:24px;margin:0 0 16px"><span style="font-size:36px;font-weight:800;color:#1D9E75;letter-spacing:10px;font-family:monospace">${code}</span></div><p style="color:#7A7D8A;font-size:13px">Expira em 5 minutos</p></div></div>`
+        subject: '🔐 Seu codigo VaultChat',
+        html: '<div style="background:#0A0B0D;padding:40px;text-align:center"><h2 style="color:#1D9E75">VaultChat</h2><p style="color:#F0EEE8">Seu codigo de verificacao:</p><h1 style="color:#1D9E75;letter-spacing:10px">' + code + '</h1><p style="color:#7A7D8A">Expira em 5 minutos</p></div>'
       })
     });
     const data = await response.json();

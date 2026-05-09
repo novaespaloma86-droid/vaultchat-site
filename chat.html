@@ -11,7 +11,6 @@
 // VaultChat — Módulo de Chamadas WebRTC via Supabase Realtime
 // ============================================================
 
-const SUPABASE_ANON_KEY = 'sb_publishable_AqEz3N2R5apg8tGG0rDu5w_2L92h4ya';
 
 // STUN servers gratuitos (Google + Cloudflare)
 const ICE_SERVERS = {
@@ -809,6 +808,18 @@ body{background:var(--bg);color:var(--text);font-family:'Syne',sans-serif;displa
 const SUPABASE_URL='https://exkspbpamuqzzrbpbflx.supabase.co';
 const SUPABASE_KEY='sb_publishable_AqEz3N2R5apg8tGG0rDu5w_2L92h4ya';
 const sb=supabase.createClient(SUPABASE_URL,SUPABASE_KEY);
+window._sb=sb;
+
+// E2E ENCRYPTION AES-256-GCM
+const _RK={};
+let currentRoomKey=null;
+async function e2eGen(){const k=await crypto.subtle.generateKey({name:'AES-GCM',length:256},true,['encrypt','decrypt']);const r=await crypto.subtle.exportKey('raw',k);return btoa(String.fromCharCode(...new Uint8Array(r)));}
+async function e2eImp(b){try{const r=Uint8Array.from(atob(b),c=>c.charCodeAt(0));return await crypto.subtle.importKey('raw',r,{name:'AES-GCM'},false,['encrypt','decrypt']);}catch(e){return null;}}
+async function e2eEnc(t,b){try{if(!b)return t;let k=_RK[b];if(!k){k=await e2eImp(b);_RK[b]=k;}if(!k)return t;const iv=crypto.getRandomValues(new Uint8Array(12));const enc=await crypto.subtle.encrypt({name:'AES-GCM',iv},k,new TextEncoder().encode(t));const o=new Uint8Array(12+enc.byteLength);o.set(iv,0);o.set(new Uint8Array(enc),12);return 'ENC:'+btoa(String.fromCharCode(...o));}catch(e){return t;}}
+async function e2eDec(t,b){try{if(!t||!t.startsWith('ENC:'))return t;if(!b)return '[Sem chave]';let k=_RK[b];if(!k){k=await e2eImp(b);_RK[b]=k;}if(!k)return '[Sem chave]';const c=Uint8Array.from(atob(t.slice(4)),c=>c.charCodeAt(0));const d=await crypto.subtle.decrypt({name:'AES-GCM',iv:c.slice(0,12)},k,c.slice(12));return new TextDecoder().decode(d);}catch(e){return '[Mensagem criptografada]';}}
+function e2eSave(id,b){const k=JSON.parse(localStorage.getItem('vc_keys')||'{}');k[id]=b;localStorage.setItem('vc_keys',JSON.stringify(k));}
+function e2eLoad(id){return(JSON.parse(localStorage.getItem('vc_keys')||'{}')||{})[id]||null;}
+
 const user=JSON.parse(localStorage.getItem('vc_user')||'{"name":"Usuário","email":""}');
 let currentRoom=null,currentRoomData=null,realtimeSub=null,localMessages=[],screenshotCooldown=false;
 let _pendingInvite=null;
@@ -910,6 +921,8 @@ async function processarConvite(token){
   await sb.from('room_members').upsert({id:invite.room_id+'_'+user.email,room_id:invite.room_id,user_email:user.email||user.name,user_name:user.name,invited_by:invite.created_by});
   await sb.from('invites').update({used_count:invite.used_count+1}).eq('token',token);
   await sb.from('messages').insert({id:'join_'+Date.now(),room_id:invite.room_id,sender:'__SISTEMA__',text:'👋 '+user.name+' entrou na sala.',sent_at:new Date().toISOString(),expires_at:new Date(Date.now()+86400000).toISOString()});
+  const frag=window.location.hash;
+  if(frag.includes('key=')){const ch=decodeURIComponent(frag.split('key=')[1]);e2eSave(invite.room_id,ch);}
   window.history.replaceState({},'',window.location.pathname);
   mostrarToast('Bem-vindo à sala!','Você foi adicionado com sucesso.');
   await loadRooms();
@@ -927,7 +940,8 @@ async function showInvite(){
     invite=newInvite;
   }
   if(invite){
-    const link=window.location.origin+window.location.pathname+'?invite='+invite.token;
+    const keyPart=currentRoomKey?'#key='+encodeURIComponent(currentRoomKey):'';
+    const link=window.location.origin+window.location.pathname+'?invite='+invite.token+keyPart;
     document.getElementById('inviteLink').textContent=link;
     document.getElementById('inviteLink').dataset.link=link;
   }
@@ -1160,6 +1174,7 @@ async function deleteRoom(roomId,roomName){
 async function selectRoom(room){
   if(room.expires_at&&new Date(room.expires_at)<new Date()){await deleteRoom(room.id,room.name);return;}
   currentRoom=room.id;currentRoomData=room;localMessages=[];
+  currentRoomKey=e2eLoad(room.id);
   document.getElementById('currentRoomName').textContent=room.name;
   let ttlInfo=ttlLabel(room.ttl)+' · E2E';
   if(room.expires_at)ttlInfo+=' · Sala: '+timeLeft(room.expires_at);
@@ -1191,7 +1206,8 @@ async function sendMessage(){
   const tempMsg={id:tempId,room_id:currentRoom,sender:user.name,text,sent_at:new Date().toISOString(),expires_at,_sending:true};
   localMessages.push(tempMsg);renderMessages(localMessages);
   input.value='';input.style.height='auto';
-  const{data}=await sb.from('messages').insert({id:Date.now().toString(),room_id:currentRoom,sender:user.name,text,sent_at:tempMsg.sent_at,expires_at}).select().single();
+  const textEnv=currentRoomKey?await e2eEnc(text,currentRoomKey):text;
+  const{data}=await sb.from('messages').insert({id:Date.now().toString(),room_id:currentRoom,sender:user.name,text:textEnv,sent_at:tempMsg.sent_at,expires_at}).select().single();
   const idx=localMessages.findIndex(m=>m.id===tempId);
   if(idx!==-1){data?localMessages[idx]={...data}:localMessages.splice(idx,1);renderMessages(localMessages);}
 }
@@ -1223,7 +1239,12 @@ function renderMessages(msgs){
       link.innerHTML='<div class="msg-file-icon">📄</div><div><div style="font-size:12px;font-weight:600">'+(msg.file_name||'Arquivo')+'</div><div style="font-size:10px;opacity:.7">Toque para abrir</div></div>';
       b.appendChild(link);
     } else if(msg.text&&!['[IMAGEM]','[ARQUIVO]'].includes(msg.text)){
-      const t=document.createElement('div');t.textContent=msg.text;b.appendChild(t);
+      const t=document.createElement('div');
+      if(msg.text.startsWith('ENC:')&&currentRoomKey){
+        t.textContent='Descriptografando...';
+        e2eDec(msg.text,currentRoomKey).then(p=>{t.textContent=p;});
+      } else { t.textContent=msg.text; }
+      b.appendChild(t);
     }
     const meta=document.createElement('div');meta.className='msg-meta';
     meta.innerHTML='<span>'+new Date(msg.sent_at).toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'})+(msg._sending?' · ⏳':'')+'</span>';
@@ -1268,7 +1289,10 @@ async function createRoom(){
   const ttl=parseInt(document.getElementById('roomTTLInput').value);
   const expire=parseInt(document.getElementById('roomExpireInput').value);
   const expires_at=expire>0?new Date(Date.now()+expire).toISOString():null;
-  const{data}=await sb.from('rooms').insert({id:'room_'+Date.now(),name,ttl,expires_at,created_at:new Date().toISOString()}).select().single();
+  const roomId='room_'+Date.now();
+  const chave=await e2eGen();
+  e2eSave(roomId,chave);currentRoomKey=chave;
+  const{data}=await sb.from('rooms').insert({id:roomId,name,ttl,expires_at,created_at:new Date().toISOString()}).select().single();
   closeModal('newRoomModal');document.getElementById('roomNameInput').value='';
   await loadRooms();if(data)selectRoom(data);
 }

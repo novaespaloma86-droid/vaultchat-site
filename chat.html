@@ -1135,12 +1135,14 @@ function autoResize(el){el.style.height='auto';el.style.height=Math.min(el.scrol
 
 // ═══ SALAS ═══
 async function loadRooms(){
-  const now=new Date().toISOString();
-  await sb.from('rooms').delete().lt('expires_at',now).not('expires_at','is',null);
+  cleanupExpired();
   const{data}=await sb.from('rooms').select('*').order('created_at');
+  // Filtra salas expiradas localmente
+  const now=new Date();
+  const allRooms=(data||[]).filter(r=>!r.expires_at||new Date(r.expires_at)>now);
   const bar=document.getElementById('roomsBar');
   bar.innerHTML='<button class="add-room" onclick="showNewRoom()">+ Nova sala</button>';
-  if(data)data.forEach(r=>{
+  if(allRooms)allRooms.forEach(r=>{
     const chip=document.createElement('div');
     const expiring=r.expires_at&&new Date(r.expires_at)-new Date()<3600000;
     chip.className='room-chip'+(currentRoom===r.id?' active':'')+(expiring?' expiring':'');
@@ -1156,8 +1158,11 @@ async function loadRooms(){
 
 async function deleteRoom(roomId,roomName){
   if(!confirm('Apagar a sala "'+roomName+'"?'))return;
-  await sb.from('messages').delete().eq('room_id',roomId);
-  await sb.from('rooms').delete().eq('id',roomId);
+  // Delete em paralelo para ser mais rápido
+  await Promise.all([
+    sb.from('messages').delete().eq('room_id',roomId),
+    sb.from('rooms').delete().eq('id',roomId)
+  ]);
   if(currentRoom===roomId){
     currentRoom=null;currentRoomData=null;
     document.getElementById('currentRoomName').textContent='VaultChat';
@@ -1184,16 +1189,30 @@ async function selectRoom(room){
   document.getElementById('callBtns').style.display='flex';
   document.getElementById('ttlSelect').value=room.ttl||86400000;
   document.getElementById('emptyState').style.display='none';
-  await sb.from('room_members').upsert({id:room.id+'_'+(user.email||user.name),room_id:room.id,user_email:user.email||user.name,user_name:user.name,invited_by:user.name});
-  loadRooms();await loadMessages();subscribeRoom();
+  sb.from('room_members').upsert({id:room.id+'_'+(user.email||user.name),room_id:room.id,user_email:user.email||user.name,user_name:user.name,invited_by:user.name}).then(()=>{});
+  loadRooms();
+  loadMessages();
+  subscribeRoom();
 }
 
 async function loadMessages(){
   if(!currentRoom)return;
-  const now=new Date().toISOString();
-  await sb.from('messages').delete().eq('room_id',currentRoom).lt('expires_at',now).not('expires_at','is',null);
   const{data}=await sb.from('messages').select('*').eq('room_id',currentRoom).order('sent_at');
-  localMessages=data||[];renderMessages(localMessages);
+  // Filtra expiradas localmente (sem fazer DELETE lento)
+  const now=new Date();
+  localMessages=(data||[]).filter(m=>!m.expires_at||new Date(m.expires_at)>now);
+  renderMessages(localMessages);
+}
+
+// Limpeza em background a cada 5 minutos
+let _lastCleanup=0;
+async function cleanupExpired(){
+  const now=Date.now();
+  if(now-_lastCleanup<5*60*1000)return;
+  _lastCleanup=now;
+  const iso=new Date().toISOString();
+  sb.from('messages').delete().lt('expires_at',iso).not('expires_at','is',null).then(()=>{});
+  sb.from('rooms').delete().lt('expires_at',iso).not('expires_at','is',null).then(()=>{});
 }
 
 async function sendMessage(){
@@ -1215,16 +1234,16 @@ async function sendMessage(){
 function renderMessages(msgs){
   const c=document.getElementById('messages');
   const atBottom=c.scrollHeight-c.scrollTop-c.clientHeight<50;
-  c.innerHTML='';
+  const frag=document.createDocumentFragment();
   const enc=document.createElement('div');enc.className='enc-badge';
   enc.innerHTML='<div class="enc-dot"></div> E2E · Mensagens e salas expiram automaticamente';
-  c.appendChild(enc);
+  frag.appendChild(enc);
   msgs.forEach(msg=>{
     if(msg.sender==='__SISTEMA__'){
       const a=document.createElement('div');
       const isAlert=msg.text.includes('🚨');
       a.className='msg-bubble '+(isAlert?'alert-msg':'system-msg');
-      a.textContent=msg.text;c.appendChild(a);return;
+      a.textContent=msg.text;frag.appendChild(a);return;
     }
     const isMine=msg.sender===user.name;
     const b=document.createElement('div');
@@ -1255,8 +1274,10 @@ function renderMessages(msgs){
       badge.textContent='⏱ '+timeLeft(msg.expires_at);
       meta.appendChild(badge);
     }
-    b.appendChild(meta);c.appendChild(b);
+    b.appendChild(meta);frag.appendChild(b);
   });
+  c.innerHTML='';
+  c.appendChild(frag);
   if(atBottom||msgs[msgs.length-1]?.sender===user.name)c.scrollTop=c.scrollHeight;
 }
 
@@ -1317,7 +1338,7 @@ function mostrarToast(title,body,danger=false){
   document.body.appendChild(div);setTimeout(()=>div.remove(),4000);
 }
 function goLogin(){localStorage.removeItem('vc_token');window.location.href='login.html';}
-setInterval(()=>{if(currentRoom)loadMessages();loadRooms();},60000);
+setInterval(()=>{if(currentRoom)loadMessages();loadRooms();cleanupExpired();},120000);
 loadRooms();
 </script>
 

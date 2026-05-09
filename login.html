@@ -5,6 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
 <title>VaultChat — Login</title>
 <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&display=swap" rel="stylesheet"/>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <style>
 *{margin:0;padding:0;box-sizing:border-box}
 body{background:#0A0B0D;color:#F0EEE8;font-family:'Syne',sans-serif;min-height:100vh;display:flex;align-items:center;justify-content:center;padding:20px;flex-direction:column;gap:16px}
@@ -25,6 +26,7 @@ body{background:#0A0B0D;color:#F0EEE8;font-family:'Syne',sans-serif;min-height:1
 .btn{width:100%;padding:14px;background:#1D9E75;border:none;border-radius:12px;color:#fff;font-size:16px;font-family:'Syne',sans-serif;font-weight:800;cursor:pointer;margin-top:8px;transition:opacity .2s}
 .btn:hover{opacity:.85}
 .btn:disabled{opacity:.5;cursor:not-allowed}
+.btn-sec{width:100%;padding:12px;background:transparent;border:1px solid #2A2D38;border-radius:12px;color:#7A7D8A;font-size:14px;font-family:'Syne',sans-serif;cursor:pointer;margin-top:8px}
 .link-btn{background:none;border:none;color:#1D9E75;font-size:13px;font-family:'Syne',sans-serif;cursor:pointer;text-decoration:underline;margin-top:12px;display:block;text-align:center;width:100%}
 .msg{padding:12px;border-radius:8px;font-size:13px;margin-top:12px;text-align:center;display:none}
 .msg.error{background:rgba(216,90,48,.15);border:0.5px solid #D85A30;color:#D85A30}
@@ -32,6 +34,14 @@ body{background:#0A0B0D;color:#F0EEE8;font-family:'Syne',sans-serif;min-height:1
 .enc{display:flex;align-items:center;justify-content:center;gap:6px;margin-top:20px;font-size:11px;color:#7A7D8A;font-family:monospace}
 .enc-dot{width:5px;height:5px;border-radius:50%;background:#1D9E75;animation:pulse 2s infinite}
 @keyframes pulse{0%,100%{opacity:1}50%{opacity:.3}}
+
+/* 2FA */
+.code-inputs{display:flex;gap:10px;justify-content:center;margin:16px 0}
+.code-inputs input{width:46px;height:56px;text-align:center;font-size:24px;font-weight:800;background:#161820;border:1px solid #2A2D38;border-radius:10px;color:#F0EEE8;font-family:'Syne',sans-serif;outline:none;transition:border .2s}
+.code-inputs input:focus{border-color:#1D9E75}
+.code-timer{text-align:center;font-size:12px;color:#7A7D8A;margin-bottom:8px}
+.code-timer span{color:#1D9E75;font-weight:700}
+.security-badge{display:flex;align-items:center;gap:8px;background:rgba(29,158,117,.08);border:1px solid rgba(29,158,117,.2);border-radius:10px;padding:10px 12px;margin-bottom:16px;font-size:12px;color:#9FE1CB}
 </style>
 </head>
 <body>
@@ -50,77 +60,332 @@ body{background:#0A0B0D;color:#F0EEE8;font-family:'Syne',sans-serif;min-height:1
     <div class="logo-icon">🔒</div>
     <div class="logo-name">VaultChat</div>
   </div>
+
+  <!-- TELA LOGIN/REGISTER -->
   <div id="authArea">
     <div class="tabs">
       <div class="tab active" id="tabLogin" onclick="switchTab('login',this)">Entrar</div>
       <div class="tab" id="tabRegister" onclick="switchTab('register',this)">Criar conta</div>
     </div>
+
     <div id="loginForm">
-      <div class="field"><label id="lEmail">E-MAIL</label><input type="email" id="loginEmail" placeholder="seu@email.com"/></div>
-      <div class="field"><label id="lSenha">SENHA</label><input type="password" id="loginPassword" placeholder="Sua senha"/></div>
+      <div class="field"><label>E-MAIL</label><input type="email" id="loginEmail" placeholder="seu@email.com"/></div>
+      <div class="field"><label>SENHA</label><input type="password" id="loginPassword" placeholder="Sua senha" onkeydown="if(event.key==='Enter')login()"/></div>
       <button class="btn" onclick="login()" id="loginBtn">Entrar</button>
-      <button class="link-btn" onclick="showForgot()" id="forgotLink">Esqueci minha senha</button>
+      <button class="link-btn" onclick="showForgot()">Esqueci minha senha</button>
     </div>
+
     <div id="registerForm" style="display:none">
-      <div class="field"><label id="rNome">NOME</label><input type="text" id="regName" placeholder="Seu nome"/></div>
+      <div class="field"><label>NOME</label><input type="text" id="regName" placeholder="Seu nome"/></div>
       <div class="field"><label>E-MAIL</label><input type="email" id="regEmail" placeholder="seu@email.com"/></div>
-      <div class="field"><label id="rSenha">SENHA</label><input type="password" id="regPassword" placeholder="Mínimo 6 caracteres"/></div>
+      <div class="field"><label>SENHA</label><input type="password" id="regPassword" placeholder="Mínimo 6 caracteres"/></div>
       <button class="btn" onclick="register()" id="registerBtn">Criar conta</button>
     </div>
+
     <div id="forgotForm" style="display:none">
-      <p id="forgotDesc" style="font-size:14px;color:#7A7D8A;margin-bottom:16px;text-align:center">Digite seu e-mail e enviaremos um link para redefinir sua senha.</p>
+      <p style="font-size:14px;color:#7A7D8A;margin-bottom:16px;text-align:center">Digite seu e-mail para redefinir sua senha.</p>
       <div class="field"><label>E-MAIL</label><input type="email" id="forgotEmail" placeholder="seu@email.com"/></div>
-      <div class="field" id="newPassField" style="display:none"><label id="lNewPass">NOVA SENHA</label><input type="password" id="newPassword" placeholder="Nova senha"/></div>
-      <button class="btn" onclick="forgotPassword()" id="forgotBtn">Enviar link</button>
-      <button class="link-btn" onclick="showLogin()" id="backLogin">Voltar para o login</button>
+      <div class="field" id="newPassField" style="display:none"><label>NOVA SENHA</label><input type="password" id="newPassword" placeholder="Nova senha"/></div>
+      <button class="btn" onclick="forgotPassword()" id="forgotBtn">Enviar código</button>
+      <button class="link-btn" onclick="showLogin()">Voltar para o login</button>
     </div>
+
     <div class="msg" id="msg"></div>
-    <div class="enc"><div class="enc-dot"></div><span id="encTxt">AES-256 · Criptografia ponta a ponta</span></div>
+    <div class="enc"><div class="enc-dot"></div><span>AES-256 · Criptografia ponta a ponta</span></div>
+  </div>
+
+  <!-- TELA 2FA -->
+  <div id="tfaArea" style="display:none">
+    <div class="security-badge">🛡️ Verificação em duas etapas ativada</div>
+    <p style="text-align:center;font-size:14px;color:#7A7D8A;margin-bottom:8px">Digite o código enviado para</p>
+    <p style="text-align:center;font-size:14px;font-weight:700;color:#1D9E75;margin-bottom:20px" id="tfaEmailLabel"></p>
+    <div class="code-inputs">
+      <input type="number" maxlength="1" id="c1" oninput="moveNext(this,'c2')" onkeydown="movePrev(event,null,'c1')"/>
+      <input type="number" maxlength="1" id="c2" oninput="moveNext(this,'c3')" onkeydown="movePrev(event,'c1','c2')"/>
+      <input type="number" maxlength="1" id="c3" oninput="moveNext(this,'c4')" onkeydown="movePrev(event,'c2','c3')"/>
+      <input type="number" maxlength="1" id="c4" oninput="moveNext(this,'c5')" onkeydown="movePrev(event,'c3','c4')"/>
+      <input type="number" maxlength="1" id="c5" oninput="moveNext(this,'c6')" onkeydown="movePrev(event,'c4','c5')"/>
+      <input type="number" maxlength="1" id="c6" oninput="moveNext(this,null)" onkeydown="movePrev(event,'c5','c6')"/>
+    </div>
+    <div class="code-timer">Código expira em <span id="timerDisplay">05:00</span></div>
+    <button class="btn" onclick="verify2FA()" id="verifyBtn">Verificar</button>
+    <button class="btn-sec" onclick="reenviarCodigo()">Reenviar código</button>
+    <div class="msg" id="tfaMsg"></div>
   </div>
 </div>
+
 <script>
-const T={
-  pt:{login:'Entrar',register:'Criar conta',email:'E-MAIL',password:'SENHA',name:'NOME',loginBtn:'Entrar',registerBtn:'Criar conta',forgot:'Esqueci minha senha',forgotDesc:'Digite seu e-mail e enviaremos um link para redefinir sua senha.',sendLink:'Enviar link',backLogin:'Voltar para o login',newPass:'NOVA SENHA',resetBtn:'Redefinir senha',enc:'AES-256 · Criptografia ponta a ponta',logout:'Sair',fillAll:'Preencha todos os campos',minPass:'Senha: mínimo 6 caracteres',emailUsed:'Email já cadastrado',wrongPass:'Email ou senha incorretos',emailNotFound:'Email não encontrado',resetOk:'Senha redefinida! Faça login.',emailPlaceholder:'seu@email.com',passPlaceholder:'Sua senha',namePlaceholder:'Seu nome',minPlaceholder:'Mínimo 6 caracteres',newPlaceholder:'Nova senha'},
-  en:{login:'Sign In',register:'Sign Up',email:'EMAIL',password:'PASSWORD',name:'NAME',loginBtn:'Sign In',registerBtn:'Create Account',forgot:'Forgot my password',forgotDesc:'Enter your email and we will send a reset link.',sendLink:'Send link',backLogin:'Back to login',newPass:'NEW PASSWORD',resetBtn:'Reset password',enc:'AES-256 · End-to-end encryption',logout:'Sign Out',fillAll:'Please fill all fields',minPass:'Password: minimum 6 characters',emailUsed:'Email already registered',wrongPass:'Wrong email or password',emailNotFound:'Email not found',resetOk:'Password reset! Please login.',emailPlaceholder:'your@email.com',passPlaceholder:'Your password',namePlaceholder:'Your name',minPlaceholder:'At least 6 characters',newPlaceholder:'New password'},
-  es:{login:'Entrar',register:'Registrarse',email:'CORREO',password:'CONTRASEÑA',name:'NOMBRE',loginBtn:'Entrar',registerBtn:'Crear cuenta',forgot:'Olvidé mi contraseña',forgotDesc:'Ingresa tu correo y te enviaremos un enlace.',sendLink:'Enviar enlace',backLogin:'Volver al inicio',newPass:'NUEVA CONTRASEÑA',resetBtn:'Restablecer',enc:'AES-256 · Cifrado de extremo a extremo',logout:'Salir',fillAll:'Completa todos los campos',minPass:'Contraseña: mínimo 6 caracteres',emailUsed:'Email ya registrado',wrongPass:'Email o contraseña incorrectos',emailNotFound:'Email no encontrado',resetOk:'Contraseña restablecida.',emailPlaceholder:'tu@email.com',passPlaceholder:'Tu contraseña',namePlaceholder:'Tu nombre',minPlaceholder:'Mínimo 6 caracteres',newPlaceholder:'Nueva contraseña'},
-  fr:{login:'Connexion',register:"S'inscrire",email:'E-MAIL',password:'MOT DE PASSE',name:'NOM',loginBtn:'Se connecter',registerBtn:'Créer un compte',forgot:'Mot de passe oublié',forgotDesc:'Entrez votre e-mail et nous vous enverrons un lien.',sendLink:'Envoyer le lien',backLogin:'Retour à la connexion',newPass:'NOUVEAU MOT DE PASSE',resetBtn:'Réinitialiser',enc:'AES-256 · Chiffrement de bout en bout',logout:'Déconnexion',fillAll:'Remplissez tous les champs',minPass:'Mot de passe: 6 caractères minimum',emailUsed:'Email déjà enregistré',wrongPass:'Email ou mot de passe incorrect',emailNotFound:'Email introuvable',resetOk:'Mot de passe réinitialisé.',emailPlaceholder:'votre@email.com',passPlaceholder:'Votre mot de passe',namePlaceholder:'Votre nom',minPlaceholder:'Au moins 6 caractères',newPlaceholder:'Nouveau mot de passe'},
-  de:{login:'Anmelden',register:'Registrieren',email:'E-MAIL',password:'PASSWORT',name:'NAME',loginBtn:'Anmelden',registerBtn:'Konto erstellen',forgot:'Passwort vergessen',forgotDesc:'Geben Sie Ihre E-Mail ein und wir senden Ihnen einen Link.',sendLink:'Link senden',backLogin:'Zurück zur Anmeldung',newPass:'NEUES PASSWORT',resetBtn:'Zurücksetzen',enc:'AES-256 · Ende-zu-Ende-Verschlüsselung',logout:'Abmelden',fillAll:'Bitte alle Felder ausfüllen',minPass:'Passwort: mindestens 6 Zeichen',emailUsed:'E-Mail bereits registriert',wrongPass:'E-Mail oder Passwort falsch',emailNotFound:'E-Mail nicht gefunden',resetOk:'Passwort zurückgesetzt.',emailPlaceholder:'ihre@email.de',passPlaceholder:'Ihr Passwort',namePlaceholder:'Ihr Name',minPlaceholder:'Mindestens 6 Zeichen',newPlaceholder:'Neues Passwort'},
-  it:{login:'Accedi',register:'Registrati',email:'EMAIL',password:'PASSWORD',name:'NOME',loginBtn:'Accedi',registerBtn:'Crea account',forgot:'Ho dimenticato la password',forgotDesc:'Inserisci la tua email e ti invieremo un link.',sendLink:'Invia link',backLogin:'Torna al login',newPass:'NUOVA PASSWORD',resetBtn:'Reimposta',enc:'AES-256 · Crittografia end-to-end',logout:'Esci',fillAll:'Compila tutti i campi',minPass:'Password: minimo 6 caratteri',emailUsed:'Email già registrata',wrongPass:'Email o password errati',emailNotFound:'Email non trovata',resetOk:'Password reimpostata.',emailPlaceholder:'tua@email.com',passPlaceholder:'La tua password',namePlaceholder:'Il tuo nome',minPlaceholder:'Almeno 6 caratteri',newPlaceholder:'Nuova password'},
-  zh:{login:'登录',register:'注册',email:'邮箱',password:'密码',name:'姓名',loginBtn:'登录',registerBtn:'创建账户',forgot:'忘记密码',forgotDesc:'输入您的邮箱，我们将发送重置链接。',sendLink:'发送链接',backLogin:'返回登录',newPass:'新密码',resetBtn:'重置密码',enc:'AES-256 · 端对端加密',logout:'退出',fillAll:'请填写所有字段',minPass:'密码至少6个字符',emailUsed:'邮箱已注册',wrongPass:'邮箱或密码错误',emailNotFound:'邮箱未找到',resetOk:'密码已重置。',emailPlaceholder:'你的@邮箱.com',passPlaceholder:'你的密码',namePlaceholder:'你的名字',minPlaceholder:'至少6个字符',newPlaceholder:'新密码'},
-  ja:{login:'ログイン',register:'登録',email:'メール',password:'パスワード',name:'名前',loginBtn:'ログイン',registerBtn:'アカウント作成',forgot:'パスワードを忘れた',forgotDesc:'メールを入力してください。リセットリンクをお送りします。',sendLink:'リンクを送る',backLogin:'ログインに戻る',newPass:'新しいパスワード',resetBtn:'リセット',enc:'AES-256 · エンドツーエンド暗号化',logout:'ログアウト',fillAll:'全フィールドを入力してください',minPass:'パスワード: 6文字以上',emailUsed:'メールは既に登録済みです',wrongPass:'メールまたはパスワードが違います',emailNotFound:'メールが見つかりません',resetOk:'パスワードをリセットしました。',emailPlaceholder:'メール@example.com',passPlaceholder:'パスワード',namePlaceholder:'お名前',minPlaceholder:'6文字以上',newPlaceholder:'新しいパスワード'}
-};
+const SUPABASE_URL='https://exkspbpamuqzzrbpbflx.supabase.co';
+const SUPABASE_KEY='sb_publishable_AqEz3N2R5apg8tGG0rDu5w_2L92h4ya';
+const sb=supabase.createClient(SUPABASE_URL,SUPABASE_KEY);
 
 let lang='pt';
-const USERS=JSON.parse(localStorage.getItem('vc_users')||'{}');
-function saveUsers(){localStorage.setItem('vc_users',JSON.stringify(USERS));}
+let _pendingUser=null;
+let _timerInterval=null;
 
-function setLang(l,btn){
-  lang=l;
-  document.querySelectorAll('.lang-btn').forEach(b=>b.classList.remove('active'));
-  btn.classList.add('active');
-  const t=T[l];
-  document.getElementById('tabLogin').textContent=t.login;
-  document.getElementById('tabRegister').textContent=t.register;
-  document.getElementById('lEmail').textContent=t.email;
-  document.getElementById('lSenha').textContent=t.password;
-  document.getElementById('rNome').textContent=t.name;
-  document.getElementById('rSenha').textContent=t.password;
-  document.getElementById('loginBtn').textContent=t.loginBtn;
-  document.getElementById('registerBtn').textContent=t.registerBtn;
-  document.getElementById('forgotLink').textContent=t.forgot;
-  document.getElementById('forgotDesc').textContent=t.forgotDesc;
-  document.getElementById('forgotBtn').textContent=document.getElementById('newPassField').style.display==='none'?t.sendLink:t.resetBtn;
-  document.getElementById('backLogin').textContent=t.backLogin;
-  document.getElementById('lNewPass').textContent=t.newPass;
-  document.getElementById('encTxt').textContent=t.enc;
-  document.getElementById('loginEmail').placeholder=t.emailPlaceholder;
-  document.getElementById('loginPassword').placeholder=t.passPlaceholder;
-  document.getElementById('regName').placeholder=t.namePlaceholder;
-  document.getElementById('regEmail').placeholder=t.emailPlaceholder;
-  document.getElementById('regPassword').placeholder=t.minPlaceholder;
-  document.getElementById('newPassword').placeholder=t.newPlaceholder;
+// ── Hash de senha simples (SHA-256 via SubtleCrypto) ──
+async function hashPassword(password){
+  const encoder=new TextEncoder();
+  const data=encoder.encode(password+SUPABASE_URL); // salt
+  const hashBuffer=await crypto.subtle.digest('SHA-256',data);
+  const hashArray=Array.from(new Uint8Array(hashBuffer));
+  return hashArray.map(b=>b.toString(16).padStart(2,'0')).join('');
 }
 
+// ── Gerar código 6 dígitos ──
+function gerarCodigo(){
+  return Math.floor(100000+Math.random()*900000).toString();
+}
+
+// ── Enviar código por email via Supabase Edge Function ou salvar na tabela ──
+async function enviarCodigo(email, nome){
+  const code=gerarCodigo();
+  const expires_at=new Date(Date.now()+5*60*1000).toISOString(); // 5 min
+
+  // Invalida códigos anteriores
+  await sb.from('vc_2fa_codes').delete().eq('email',email);
+
+  // Salva novo código
+  await sb.from('vc_2fa_codes').insert({
+    email,
+    code,
+    expires_at,
+    used:false
+  });
+
+  // Tenta enviar via Resend (se configurado) ou mostra na tela para dev
+  try{
+    const res=await fetch('/api/send-2fa',{
+      method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({email,code,nome:nome||'Usuário'})
+    });
+    if(!res.ok)throw new Error('API offline');
+  }catch(e){
+    // Em desenvolvimento: mostra o código na tela
+    console.log('CÓDIGO 2FA (dev):', code);
+    showMsg2FA('🔧 Dev mode — código: '+code,'success');
+  }
+
+  return code;
+}
+
+// ── LOGIN ──
+async function login(){
+  const email=document.getElementById('loginEmail').value.trim().toLowerCase();
+  const password=document.getElementById('loginPassword').value;
+  if(!email||!password)return showMsg('Preencha todos os campos','error');
+
+  const btn=document.getElementById('loginBtn');
+  btn.disabled=true;btn.textContent='Verificando...';
+
+  try{
+    const hash=await hashPassword(password);
+    const{data:user,error}=await sb.from('vc_users')
+      .select('*').eq('email',email).eq('password_hash',hash).single();
+
+    if(error||!user){
+      // Tentar login legacy (localStorage) para migração
+      const legacyUsers=JSON.parse(localStorage.getItem('vc_users')||'{}');
+      const legacy=legacyUsers[email];
+      if(legacy&&legacy.password===btoa(password)){
+        // Migra para Supabase
+        await migrarUsuario(legacy, hash);
+        _pendingUser={name:legacy.name,email,id:email};
+        await mostrar2FA(email, legacy.name);
+      } else {
+        showMsg('Email ou senha incorretos','error');
+      }
+      btn.disabled=false;btn.textContent='Entrar';
+      return;
+    }
+
+    _pendingUser=user;
+    btn.disabled=false;btn.textContent='Entrar';
+    await mostrar2FA(email, user.name);
+
+  }catch(e){
+    showMsg('Erro ao conectar. Tente novamente.','error');
+    btn.disabled=false;btn.textContent='Entrar';
+  }
+}
+
+async function migrarUsuario(legacy, hash){
+  try{
+    await sb.from('vc_users').upsert({
+      name:legacy.name,
+      email:legacy.email,
+      password_hash:hash,
+      is_verified:true
+    });
+  }catch(e){console.log('migração:',e);}
+}
+
+// ── REGISTER ──
+async function register(){
+  const name=document.getElementById('regName').value.trim();
+  const email=document.getElementById('regEmail').value.trim().toLowerCase();
+  const password=document.getElementById('regPassword').value;
+
+  if(!name||!email||!password)return showMsg('Preencha todos os campos','error');
+  if(password.length<6)return showMsg('Senha: mínimo 6 caracteres','error');
+
+  const btn=document.getElementById('registerBtn');
+  btn.disabled=true;btn.textContent='Criando conta...';
+
+  try{
+    // Verifica se já existe
+    const{data:existing}=await sb.from('vc_users').select('id').eq('email',email).single();
+    if(existing){
+      showMsg('Email já cadastrado','error');
+      btn.disabled=false;btn.textContent='Criar conta';
+      return;
+    }
+
+    const hash=await hashPassword(password);
+    const{data:newUser,error}=await sb.from('vc_users').insert({
+      name,email,password_hash:hash,is_verified:false
+    }).select().single();
+
+    if(error)throw error;
+
+    _pendingUser=newUser;
+    btn.disabled=false;btn.textContent='Criar conta';
+    await mostrar2FA(email, name);
+
+  }catch(e){
+    showMsg('Erro ao criar conta: '+e.message,'error');
+    btn.disabled=false;btn.textContent='Criar conta';
+  }
+}
+
+// ── MOSTRAR TELA 2FA ──
+async function mostrar2FA(email, nome){
+  document.getElementById('authArea').style.display='none';
+  document.getElementById('tfaArea').style.display='block';
+  document.getElementById('tfaEmailLabel').textContent=email;
+
+  await enviarCodigo(email, nome);
+  iniciarTimer(5*60);
+
+  setTimeout(()=>document.getElementById('c1').focus(),100);
+}
+
+// ── VERIFICAR CÓDIGO 2FA ──
+async function verify2FA(){
+  const code=['c1','c2','c3','c4','c5','c6'].map(id=>document.getElementById(id).value).join('');
+  if(code.length<6)return showMsg2FA('Digite o código completo','error');
+
+  const btn=document.getElementById('verifyBtn');
+  btn.disabled=true;btn.textContent='Verificando...';
+
+  const{data:record}=await sb.from('vc_2fa_codes')
+    .select('*').eq('email',_pendingUser.email||_pendingUser.id).eq('code',code).eq('used',false).single();
+
+  if(!record){
+    showMsg2FA('Código inválido','error');
+    btn.disabled=false;btn.textContent='Verificar';
+    return;
+  }
+
+  if(new Date(record.expires_at)<new Date()){
+    showMsg2FA('Código expirado. Reenvie.','error');
+    btn.disabled=false;btn.textContent='Verificar';
+    return;
+  }
+
+  // Marca como usado
+  await sb.from('vc_2fa_codes').update({used:true}).eq('id',record.id);
+
+  // Atualiza último login
+  await sb.from('vc_users').update({last_login:new Date().toISOString(),is_verified:true})
+    .eq('email',_pendingUser.email||_pendingUser.id);
+
+  // Salva sessão
+  clearInterval(_timerInterval);
+  const sessionUser={
+    name:_pendingUser.name,
+    email:_pendingUser.email||_pendingUser.id,
+    id:_pendingUser.id
+  };
+  localStorage.setItem('vc_token','logged');
+  localStorage.setItem('vc_user',JSON.stringify(sessionUser));
+
+  showMsg2FA('✅ Verificado! Entrando...','success');
+  setTimeout(()=>window.location.href='chat.html',1000);
+}
+
+async function reenviarCodigo(){
+  if(!_pendingUser)return;
+  clearInterval(_timerInterval);
+  await enviarCodigo(_pendingUser.email||_pendingUser.id, _pendingUser.name);
+  iniciarTimer(5*60);
+  showMsg2FA('Novo código enviado!','success');
+  ['c1','c2','c3','c4','c5','c6'].forEach(id=>document.getElementById(id).value='');
+  document.getElementById('c1').focus();
+}
+
+// ── RECUPERAR SENHA ──
+async function forgotPassword(){
+  const email=document.getElementById('forgotEmail').value.trim().toLowerCase();
+  const newPassField=document.getElementById('newPassField');
+  if(!email)return showMsg('Preencha o email','error');
+
+  if(newPassField.style.display==='none'){
+    const{data:user}=await sb.from('vc_users').select('*').eq('email',email).single();
+    // Também verifica localStorage legacy
+    const legacy=JSON.parse(localStorage.getItem('vc_users')||'{}')[email];
+    if(!user&&!legacy)return showMsg('Email não encontrado','error');
+
+    _pendingUser=user||{name:legacy?.name,email,id:email};
+    newPassField.style.display='block';
+    document.getElementById('forgotBtn').textContent='Redefinir senha';
+    showMsg('Email encontrado! Digite sua nova senha.','success');
+  } else {
+    const newPass=document.getElementById('newPassword').value;
+    if(!newPass||newPass.length<6)return showMsg('Senha: mínimo 6 caracteres','error');
+    const hash=await hashPassword(newPass);
+    await sb.from('vc_users').update({password_hash:hash}).eq('email',email);
+    // Atualiza legacy também
+    const legacy=JSON.parse(localStorage.getItem('vc_users')||'{}');
+    if(legacy[email]){legacy[email].password=btoa(newPass);localStorage.setItem('vc_users',JSON.stringify(legacy));}
+    showMsg('Senha redefinida! Faça login.','success');
+    setTimeout(()=>{showLogin();newPassField.style.display='none';},2000);
+  }
+}
+
+// ── TIMER 2FA ──
+function iniciarTimer(segundos){
+  clearInterval(_timerInterval);
+  let s=segundos;
+  _timerInterval=setInterval(()=>{
+    s--;
+    const min=Math.floor(s/60).toString().padStart(2,'0');
+    const sec=(s%60).toString().padStart(2,'0');
+    const el=document.getElementById('timerDisplay');
+    if(el)el.textContent=min+':'+sec;
+    if(s<=0){
+      clearInterval(_timerInterval);
+      if(el)el.textContent='Expirado';
+    }
+  },1000);
+}
+
+// ── INPUTS DO CÓDIGO ──
+function moveNext(el,nextId){
+  el.value=el.value.slice(-1); // só 1 dígito
+  if(el.value&&nextId)document.getElementById(nextId).focus();
+  // Auto-verificar quando completo
+  const code=['c1','c2','c3','c4','c5','c6'].map(id=>document.getElementById(id).value).join('');
+  if(code.length===6)setTimeout(verify2FA,300);
+}
+function movePrev(e,prevId,currId){
+  if(e.key==='Backspace'&&!document.getElementById(currId).value&&prevId){
+    document.getElementById(prevId).focus();
+  }
+}
+
+// ── UI HELPERS ──
 function switchTab(tab,el){
   document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
   el.classList.add('active');
@@ -129,7 +394,6 @@ function switchTab(tab,el){
   document.getElementById('forgotForm').style.display='none';
   hideMsg();
 }
-
 function showForgot(){
   document.getElementById('loginForm').style.display='none';
   document.getElementById('forgotForm').style.display='block';
@@ -137,68 +401,20 @@ function showForgot(){
   document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
   hideMsg();
 }
-
 function showLogin(){
   document.getElementById('loginForm').style.display='block';
   document.getElementById('forgotForm').style.display='none';
+  document.getElementById('registerForm').style.display='none';
   document.getElementById('tabLogin').classList.add('active');
+  document.getElementById('tabRegister').classList.remove('active');
   hideMsg();
 }
-
-function showMsg(text,type){
-  const el=document.getElementById('msg');
-  el.textContent=text;el.className='msg '+type;el.style.display='block';
-}
+function showMsg(text,type){const el=document.getElementById('msg');el.textContent=text;el.className='msg '+type;el.style.display='block';}
 function hideMsg(){document.getElementById('msg').style.display='none';}
+function showMsg2FA(text,type){const el=document.getElementById('tfaMsg');el.textContent=text;el.className='msg '+type;el.style.display='block';}
+function setLang(l,btn){lang=l;document.querySelectorAll('.lang-btn').forEach(b=>b.classList.remove('active'));btn.classList.add('active');}
 
-function login(){
-  const email=document.getElementById('loginEmail').value.trim();
-  const password=document.getElementById('loginPassword').value;
-  if(!email||!password)return showMsg(T[lang].fillAll,'error');
-  const user=USERS[email];
-  if(!user||user.password!==btoa(password))return showMsg(T[lang].wrongPass,'error');
-  localStorage.setItem('vc_token','logged');
-  localStorage.setItem('vc_user',JSON.stringify(user));
-  window.location.href='chat.html';
-}
-
-function register(){
-  const name=document.getElementById('regName').value.trim();
-  const email=document.getElementById('regEmail').value.trim();
-  const password=document.getElementById('regPassword').value;
-  if(!name||!email||!password)return showMsg(T[lang].fillAll,'error');
-  if(password.length<6)return showMsg(T[lang].minPass,'error');
-  if(USERS[email])return showMsg(T[lang].emailUsed,'error');
-  const user={name,email,password:btoa(password)};
-  USERS[email]=user;saveUsers();
-  localStorage.setItem('vc_token','logged');
-  localStorage.setItem('vc_user',JSON.stringify(user));
-  window.location.href='chat.html';
-}
-
-function forgotPassword(){
-  const email=document.getElementById('forgotEmail').value.trim();
-  const newPassField=document.getElementById('newPassField');
-  if(!email)return showMsg(T[lang].fillAll,'error');
-  if(newPassField.style.display==='none'){
-    if(!USERS[email])return showMsg(T[lang].emailNotFound,'error');
-    newPassField.style.display='block';
-    document.getElementById('forgotBtn').textContent=T[lang].resetBtn;
-    showMsg('Email encontrado! Digite sua nova senha abaixo.','success');
-  } else {
-    const newPass=document.getElementById('newPassword').value;
-    if(!newPass||newPass.length<6)return showMsg(T[lang].minPass,'error');
-    USERS[email].password=btoa(newPass);
-    saveUsers();
-    showMsg(T[lang].resetOk,'success');
-    setTimeout(()=>{showLogin();newPassField.style.display='none';},2000);
-  }
-}
-
-// Se já estiver logado, vai direto para o chat
-if(localStorage.getItem('vc_token')){
-  window.location.href='chat.html';
-}
+if(localStorage.getItem('vc_token'))window.location.href='chat.html';
 </script>
 </body>
 </html>

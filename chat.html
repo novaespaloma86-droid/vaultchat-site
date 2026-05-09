@@ -807,72 +807,6 @@ body{background:var(--bg);color:var(--text);font-family:'Syne',sans-serif;displa
 </div>
 
 <script>
-
-// ══════════════════════════════════════════════════
-// E2E ENCRYPTION MODULE (AES-GCM via WebCrypto API)
-// ══════════════════════════════════════════════════
-const RoomKeys = {}; // { roomId: CryptoKey }
-
-async function gerarChaveSala(){
-  const key = await crypto.subtle.generateKey(
-    { name: 'AES-GCM', length: 256 },
-    true, ['encrypt', 'decrypt']
-  );
-  const exported = await crypto.subtle.exportKey('raw', key);
-  const b64 = btoa(String.fromCharCode(...new Uint8Array(exported)));
-  return b64;
-}
-
-async function importarChave(b64){
-  try{
-    const raw = Uint8Array.from(atob(b64), c => c.charCodeAt(0));
-    return await crypto.subtle.importKey('raw', raw, { name: 'AES-GCM' }, false, ['encrypt', 'decrypt']);
-  }catch(e){ return null; }
-}
-
-async function criptografar(texto, chaveB64){
-  try{
-    let key = RoomKeys[chaveB64];
-    if(!key){ key = await importarChave(chaveB64); RoomKeys[chaveB64] = key; }
-    if(!key) return texto;
-    const iv = crypto.getRandomValues(new Uint8Array(12));
-    const encoded = new TextEncoder().encode(texto);
-    const encrypted = await crypto.subtle.encrypt({ name: 'AES-GCM', iv }, key, encoded);
-    const combined = new Uint8Array(12 + encrypted.byteLength);
-    combined.set(iv, 0);
-    combined.set(new Uint8Array(encrypted), 12);
-    return '🔐' + btoa(String.fromCharCode(...combined));
-  }catch(e){ return texto; }
-}
-
-async function descriptografar(texto, chaveB64){
-  try{
-    if(!texto || !texto.startsWith('🔐')) return texto;
-    let key = RoomKeys[chaveB64];
-    if(!key){ key = await importarChave(chaveB64); RoomKeys[chaveB64] = key; }
-    if(!key) return '[🔒 Sem chave]';
-    const combined = Uint8Array.from(atob(texto.slice(2)), c => c.charCodeAt(0));
-    const iv = combined.slice(0, 12);
-    const data = combined.slice(12);
-    const decrypted = await crypto.subtle.decrypt({ name: 'AES-GCM', iv }, key, data);
-    return new TextDecoder().decode(decrypted);
-  }catch(e){ return '[🔒 Mensagem criptografada]'; }
-}
-
-// Salvar/carregar chave da sala no localStorage
-function salvarChaveSala(roomId, chaveB64){
-  const keys = JSON.parse(localStorage.getItem('vc_room_keys')||'{}');
-  keys[roomId] = chaveB64;
-  localStorage.setItem('vc_room_keys', JSON.stringify(keys));
-}
-
-function carregarChaveSala(roomId){
-  const keys = JSON.parse(localStorage.getItem('vc_room_keys')||'{}');
-  return keys[roomId] || null;
-}
-
-let currentRoomKey = null; // chave atual da sala aberta
-
 const SUPABASE_URL='https://exkspbpamuqzzrbpbflx.supabase.co';
 const SUPABASE_KEY='sb_publishable_AqEz3N2R5apg8tGG0rDu5w_2L92h4ya';
 const sb=supabase.createClient(SUPABASE_URL,SUPABASE_KEY);
@@ -977,12 +911,6 @@ async function processarConvite(token){
   await sb.from('room_members').upsert({id:invite.room_id+'_'+user.email,room_id:invite.room_id,user_email:user.email||user.name,user_name:user.name,invited_by:invite.created_by});
   await sb.from('invites').update({used_count:invite.used_count+1}).eq('token',token);
   await sb.from('messages').insert({id:'join_'+Date.now(),room_id:invite.room_id,sender:'__SISTEMA__',text:'👋 '+user.name+' entrou na sala.',sent_at:new Date().toISOString(),expires_at:new Date(Date.now()+86400000).toISOString()});
-  // Extrai chave E2E do fragmento da URL
-  const fragment=window.location.hash;
-  if(fragment.includes('key=')){
-    const chaveB64=decodeURIComponent(fragment.split('key=')[1]);
-    salvarChaveSala(invite.room_id, chaveB64);
-  }
   window.history.replaceState({},'',window.location.pathname);
   mostrarToast('Bem-vindo à sala!','Você foi adicionado com sucesso.');
   await loadRooms();
@@ -1000,9 +928,7 @@ async function showInvite(){
     invite=newInvite;
   }
   if(invite){
-    // Inclui chave E2E no link (no fragmento #, não vai para o servidor)
-    const keyPart=currentRoomKey?'#key='+encodeURIComponent(currentRoomKey):'';
-    const link=window.location.origin+window.location.pathname+'?invite='+invite.token+keyPart;
+    const link=window.location.origin+window.location.pathname+'?invite='+invite.token;
     document.getElementById('inviteLink').textContent=link;
     document.getElementById('inviteLink').dataset.link=link;
   }
@@ -1235,9 +1161,6 @@ async function deleteRoom(roomId,roomName){
 async function selectRoom(room){
   if(room.expires_at&&new Date(room.expires_at)<new Date()){await deleteRoom(room.id,room.name);return;}
   currentRoom=room.id;currentRoomData=room;localMessages=[];
-  // Carrega chave E2E da sala
-  const savedKey=carregarChaveSala(room.id);
-  currentRoomKey=savedKey;
   document.getElementById('currentRoomName').textContent=room.name;
   let ttlInfo=ttlLabel(room.ttl)+' · E2E';
   if(room.expires_at)ttlInfo+=' · Sala: '+timeLeft(room.expires_at);
@@ -1269,9 +1192,7 @@ async function sendMessage(){
   const tempMsg={id:tempId,room_id:currentRoom,sender:user.name,text,sent_at:new Date().toISOString(),expires_at,_sending:true};
   localMessages.push(tempMsg);renderMessages(localMessages);
   input.value='';input.style.height='auto';
-  // Criptografa se tiver chave
-  const textToSend=currentRoomKey?await criptografar(text,currentRoomKey):text;
-  const{data}=await sb.from('messages').insert({id:Date.now().toString(),room_id:currentRoom,sender:user.name,text:textToSend,sent_at:tempMsg.sent_at,expires_at}).select().single();
+  const{data}=await sb.from('messages').insert({id:Date.now().toString(),room_id:currentRoom,sender:user.name,text,sent_at:tempMsg.sent_at,expires_at}).select().single();
   const idx=localMessages.findIndex(m=>m.id===tempId);
   if(idx!==-1){data?localMessages[idx]={...data}:localMessages.splice(idx,1);renderMessages(localMessages);}
 }
@@ -1303,15 +1224,7 @@ function renderMessages(msgs){
       link.innerHTML='<div class="msg-file-icon">📄</div><div><div style="font-size:12px;font-weight:600">'+(msg.file_name||'Arquivo')+'</div><div style="font-size:10px;opacity:.7">Toque para abrir</div></div>';
       b.appendChild(link);
     } else if(msg.text&&!['[IMAGEM]','[ARQUIVO]'].includes(msg.text)){
-      const t=document.createElement('div');
-      // Descriptografa se necessário
-      if(msg.text.startsWith('🔐')&&currentRoomKey){
-        descriptografar(msg.text,currentRoomKey).then(plain=>{t.textContent=plain;});
-        t.textContent='🔓 Descriptografando...';
-      } else {
-        t.textContent=msg.text;
-      }
-      b.appendChild(t);
+      const t=document.createElement('div');t.textContent=msg.text;b.appendChild(t);
     }
     const meta=document.createElement('div');meta.className='msg-meta';
     meta.innerHTML='<span>'+new Date(msg.sent_at).toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'})+(msg._sending?' · ⏳':'')+'</span>';
@@ -1356,14 +1269,7 @@ async function createRoom(){
   const ttl=parseInt(document.getElementById('roomTTLInput').value);
   const expire=parseInt(document.getElementById('roomExpireInput').value);
   const expires_at=expire>0?new Date(Date.now()+expire).toISOString():null;
-  // Gera chave E2E para a sala
-  const chaveB64=await gerarChaveSala();
-  const roomId='room_'+Date.now();
-  const{data}=await sb.from('rooms').insert({id:roomId,name,ttl,expires_at,created_at:new Date().toISOString()}).select().single();
-  if(data){
-    salvarChaveSala(roomId, chaveB64);
-    currentRoomKey=chaveB64;
-  }
+  const{data}=await sb.from('rooms').insert({id:'room_'+Date.now(),name,ttl,expires_at,created_at:new Date().toISOString()}).select().single();
   closeModal('newRoomModal');document.getElementById('roomNameInput').value='';
   await loadRooms();if(data)selectRoom(data);
 }

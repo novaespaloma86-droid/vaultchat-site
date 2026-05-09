@@ -810,6 +810,25 @@ const SUPABASE_KEY='sb_publishable_AqEz3N2R5apg8tGG0rDu5w_2L92h4ya';
 const sb=supabase.createClient(SUPABASE_URL,SUPABASE_KEY);
 window._sb=sb;
 
+// ── CACHE DE MENSAGENS ──
+const _msgCache={};
+const _cacheTime={};
+const CACHE_TTL=30000; // 30 segundos
+
+function cacheGet(roomId){
+  if(_msgCache[roomId]&&Date.now()-_cacheTime[roomId]<CACHE_TTL)return _msgCache[roomId];
+  return null;
+}
+function cacheSet(roomId,msgs){
+  _msgCache[roomId]=msgs;
+  _cacheTime[roomId]=Date.now();
+}
+function cacheClear(roomId){
+  delete _msgCache[roomId];
+  delete _cacheTime[roomId];
+}
+
+
 // E2E ENCRYPTION AES-256-GCM
 const _RK={};
 let currentRoomKey=null;
@@ -1191,16 +1210,24 @@ async function selectRoom(room){
   document.getElementById('emptyState').style.display='none';
   sb.from('room_members').upsert({id:room.id+'_'+(user.email||user.name),room_id:room.id,user_email:user.email||user.name,user_name:user.name,invited_by:user.name}).then(()=>{});
   loadRooms();
+  // Mostra cache imediatamente enquanto carrega
+  const cached=cacheGet(room.id);
+  if(cached){localMessages=cached;renderMessages(localMessages);}
   loadMessages();
   subscribeRoom();
 }
 
-async function loadMessages(){
+async function loadMessages(forceRefresh=false){
   if(!currentRoom)return;
+  // Usa cache se disponível
+  if(!forceRefresh){
+    const cached=cacheGet(currentRoom);
+    if(cached){localMessages=cached;renderMessages(localMessages);return;}
+  }
   const{data}=await sb.from('messages').select('*').eq('room_id',currentRoom).order('sent_at');
-  // Filtra expiradas localmente (sem fazer DELETE lento)
   const now=new Date();
   localMessages=(data||[]).filter(m=>!m.expires_at||new Date(m.expires_at)>now);
+  cacheSet(currentRoom,localMessages);
   renderMessages(localMessages);
 }
 
@@ -1292,11 +1319,11 @@ function subscribeRoom(){
         ocultarMensagens();setTimeout(()=>revelarMensagens(),4000);
       }
       const exists=localMessages.some(m=>m.id===msg.id||(m._sending&&m.sender===msg.sender&&m.text===msg.text));
-      if(!exists){localMessages.push(msg);renderMessages(localMessages);}
-      else{const idx=localMessages.findIndex(m=>m._sending&&m.sender===msg.sender&&m.text===msg.text);if(idx!==-1){localMessages[idx]={...msg};renderMessages(localMessages);}}
+      if(!exists){localMessages.push(msg);cacheSet(currentRoom,localMessages);renderMessages(localMessages);}
+      else{const idx=localMessages.findIndex(m=>m._sending&&m.sender===msg.sender&&m.text===msg.text);if(idx!==-1){localMessages[idx]={...msg};cacheSet(currentRoom,localMessages);renderMessages(localMessages);}}
     })
     .on('postgres_changes',{event:'DELETE',schema:'public',table:'messages',filter:'room_id=eq.'+currentRoom},(payload)=>{
-      localMessages=localMessages.filter(m=>m.id!==payload.old.id);renderMessages(localMessages);
+      localMessages=localMessages.filter(m=>m.id!==payload.old.id);cacheSet(currentRoom,localMessages);renderMessages(localMessages);
     })
     .subscribe();
 }
